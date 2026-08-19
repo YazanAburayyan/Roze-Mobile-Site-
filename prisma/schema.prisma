@@ -280,6 +280,14 @@ model Order {
 
   items OrderItem[]
 
+  /// When the shop was successfully told about this order by email.
+  /// NULL means nobody has been notified yet — either the order is brand new,
+  /// or the dispatch failed. `scripts/resend-unnotified.ts` retries exactly
+  /// this set. Notification is dispatched AFTER the transaction commits and
+  /// can never roll back an order: a saved order with no notification is
+  /// recoverable, a lost order is not.
+  notifiedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

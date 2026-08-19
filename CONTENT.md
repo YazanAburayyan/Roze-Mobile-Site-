@@ -123,28 +123,98 @@ other.
 
 ---
 
-## 3. Adding real product photos
+## 3. Adding product photos
 
-Right now every product uses a placeholder graphic. To use real photos:
+**You do not need a developer, a terminal, or a deploy for this.** Photos are
+uploaded through the Supabase dashboard in your browser.
 
-1. Save the photo as `.jpg` or `.webp`, ideally square, on a white background,
-   at least 800×800.
-2. Put it in `public/products/` — for example `public/products/iphone-16-pro.jpg`.
-3. In `prisma/seed.ts`, find that product's image entry and set the url:
+Right now every product shows a placeholder graphic. Here is how to replace it.
+
+### Before you upload — the photo itself
+
+| Requirement | Value |
+|---|---|
+| Format | WebP or JPEG (PNG works, but the files are bigger) |
+| Size on disk | **Under 2 MB** — the bucket rejects anything larger |
+| Dimensions | Roughly square, at least 800 × 800 |
+| Background | Plain white looks best in the grid |
+
+Square matters: the product grid puts every photo in the same shaped box, so a
+very wide or very tall photo will sit awkwardly next to the others.
+
+Give the file a sensible name before uploading — `iphone-16-pro.webp` is good,
+`IMG_4471.jpg` is not. **Use only lowercase letters, numbers and hyphens.** No
+spaces, no Arabic in the filename.
+
+### Step 1 — upload the photo
+
+1. Go to <https://supabase.com/dashboard> and open the ROZE project.
+2. In the left sidebar click **Storage**.
+3. Open the bucket called **products**.
+4. Click **Upload file** and pick your photo.
+
+That's the upload done. The photo is now live on the internet.
+
+### Step 2 — copy the file name
+
+You need the exact name of the file you just uploaded, for example:
+
+```
+iphone-16-pro.webp
+```
+
+Just the file name — **not** a full web address, and **not** a path with
+folders in front of it. If you uploaded into a folder inside the bucket, include
+the folder: `phones/iphone-16-pro.webp`.
+
+### Step 3 — attach it to the product
+
+Open `prisma/seed.ts`, find the product, and put that file name in its image
+entry:
 
 ```ts
 images: [{
-  url: '/products/iphone-16-pro.jpg',   // matches the filename in public/products/
-  altAr: 'آيفون 16 برو باللون الأسود',   // describe the photo, for blind users and Google
+  url: 'iphone-16-pro.webp',            // the file name from step 2
+  altAr: 'آيفون 16 برو باللون الأسود',   // describe the photo — for blind visitors and Google
   altEn: 'iPhone 16 Pro in black',
-  isPrimary: true,
+  isPrimary: true,                      // the photo shown in listings
 }]
 ```
 
-4. Run `npm run db:seed`.
+Then run `npm run db:seed` once, exactly as you would after any product change
+(section 1).
 
-Add more entries to `images` for extra angles; the first with `isPrimary: true`
-is the one shown in listings.
+> **Why this last step still touches a file:** the *photo* lives in Storage and
+> needs no developer, but the link between a photo and a product is still in
+> the catalogue file. Until there is an admin panel, that one line has to be
+> typed. It is the same file you already edit to add a product, and the same
+> command you already run.
+
+### Adding more angles
+
+Add more entries to the `images` list. The one marked `isPrimary: true` is what
+shows in the grid; the rest appear in the gallery on the product page.
+
+```ts
+images: [
+  { url: 'iphone-16-pro.webp',       altAr: '…', altEn: '…', isPrimary: true },
+  { url: 'iphone-16-pro-back.webp',  altAr: '…', altEn: '…', isPrimary: false },
+]
+```
+
+### If a photo does not appear
+
+- **You still see the placeholder graphic.** The file name in `seed.ts` does not
+  match the file in the bucket. Check spelling, capitals, and the extension
+  (`.webp` vs `.jpg`).
+- **The upload was rejected.** The file is over 2 MB, or it is not an image
+  format the bucket accepts. Re-export it smaller.
+- **A broken image icon.** Tell a developer — this usually means the site's
+  image settings need the bucket's address added, which is a one-line config
+  change.
+
+Nothing here can break the site: if a photo is missing or misnamed, the product
+simply falls back to the placeholder.
 
 ---
 

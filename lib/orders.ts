@@ -2,6 +2,7 @@ import 'server-only';
 import { prisma } from './db';
 import type { OrderDraft } from './payments/types';
 import { FREE_SHIPPING_THRESHOLD_FILS, FLAT_SHIPPING_FILS } from './cart/store';
+import { sendOrderNotification } from './notifications/order-email';
 
 /**
  * Order creation.
@@ -100,9 +101,15 @@ export async function buildOrderDraft(
  * deliberate: if the customer never presses send in WhatsApp, ROZE still has
  * the order and a phone number to call back on. Losing that would be the whole
  * point of the handoff, lost.
+ *
+ * Notification is dispatched AFTER this transaction commits — see the call at
+ * the bottom of this function. It is deliberately outside the transaction and
+ * deliberately un-awaited for its failure: a cash-on-delivery order that nobody
+ * is told about is the bug this fixes, but an order lost because an email
+ * provider was down would be a worse one.
  */
 export async function persistOrder(draft: OrderDraft, paymentMethod: string) {
-  return prisma.$transaction(async (tx) => {
+  const order = await prisma.$transaction(async (tx) => {
     const order = await tx.order.create({
       data: {
         reference: draft.reference,
@@ -149,6 +156,34 @@ export async function persistOrder(draft: OrderDraft, paymentMethod: string) {
 
     return order;
   });
+
+  // ---- COMMITTED. Everything below is outside the transaction. ----
+  // sendOrderNotification never throws and stamps notifiedAt only on a
+  // confirmed send, so a failure here leaves a recoverable order that
+  // scripts/resend-unnotified.ts will pick up.
+  await sendOrderNotification({
+    id: order.id,
+    reference: order.reference,
+    customerName: order.customerName,
+    customerPhone: order.customerPhone,
+    governorate: order.governorate,
+    area: order.area,
+    street: order.street,
+    notes: order.notes,
+    subtotalFils: order.subtotalFils,
+    shippingFils: order.shippingFils,
+    totalFils: order.totalFils,
+    paymentMethod: order.paymentMethod,
+    items: order.items.map((i) => ({
+      titleAr: i.titleAr,
+      titleEn: i.titleEn,
+      sku: i.sku,
+      quantity: i.quantity,
+      lineTotalFils: i.lineTotalFils,
+    })),
+  });
+
+  return order;
 }
 
 /**

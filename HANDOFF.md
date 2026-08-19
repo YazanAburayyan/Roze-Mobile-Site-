@@ -74,7 +74,22 @@ durations. The page has a marked comment showing exactly where the real policy
 text drops in. Needed: repair warranty length, and whether device warranties are
 handled in-shop or via the agent.
 
-### 2.5 Shipping rates — placeholder commercial policy
+### 2.5 Notification email address — blocks order alerts
+
+Cash-on-delivery orders now email the shop when one arrives. **That email has
+nowhere to go yet.** Needed:
+
+- the address the shop actually reads (`ORDER_NOTIFICATION_EMAIL`)
+- a Resend account and API key (`RESEND_API_KEY`)
+
+Until both are set, orders still save normally and a warning is logged — no
+order is lost — but nobody is told. Once set, run
+`npx tsx scripts/resend-unnotified.ts` to send the backlog.
+
+Optionally a verified sending domain, so alerts come from `orders@rozemobile…`
+rather than Resend's shared sender.
+
+### 2.6 Shipping rates — placeholder commercial policy
 
 The site currently charges a flat **3 JOD** delivery, free over **100 JOD**.
 Those numbers were invented to make checkout work end-to-end; they are not a
@@ -116,7 +131,7 @@ needed.
    Set `DATABASE_URL` and `DIRECT_URL` in the host's environment — see
    `.env.example` and EXTENDING.md section 2.
 2. Set `NEXT_PUBLIC_SITE_URL` to the real domain.
-3. Confirm the WhatsApp numbers (2.1) and shipping rates (2.5).
+3. Confirm the WhatsApp numbers (2.1), the notification email (2.5) and shipping rates (2.6).
 4. Replace placeholder product images.
 5. Drop in the real warranty text.
 6. Run `npm run build`, then with the app running: `node scripts/audit-pages.mjs`.
@@ -241,3 +256,106 @@ and `lib/orders.ts`, which is exactly what that layer was for.
 
 The order test created one order and deleted it again — the database was left
 with zero orders.
+
+**Correction to that last line:** it was true when written, but a later RLS
+probe script was piped to `head`, which closed the pipe and killed the process
+before its cleanup ran, leaving one stray probe order behind. All test fixtures
+have since been removed and the order count verified back at zero. Piping a
+cleanup script to `head` is a good way to skip its cleanup.
+
+---
+
+## 9. Sections 2, 3 and 4 (post-migration)
+
+### 4 — Authorization model: confirmed, and now documented
+
+The service-layer model is recorded in **EXTENDING.md section 2a** as a
+deliberate decision rather than an inherited default: authorization lives in
+server actions, Prisma connects as `postgres` with `rolbypassrls = true`, and
+RLS-with-no-policies is a deny-all backstop on the PostgREST path. No
+permissive policies were written, no Supabase client added, no Supabase key
+introduced.
+
+The trap is written down beside it: adding client-side access with the anon key
+returns empty results, and the intuitive fix — a permissive policy on `Order` —
+would expose customer names, phones and addresses to anyone holding a key that
+ships to every browser.
+
+`/track` is unchanged. Its disclosure property is now asserted by
+`lib/track-security.test.ts`: the wrong-phone and no-such-reference responses
+must stay **byte-identical**, so a future refactor cannot reintroduce the
+distinction that would let someone enumerate order references.
+
+### 3 — Product images in Supabase Storage
+
+A public `products` bucket, 2 MB limit, image MIME types only. Created by
+`scripts/setup-storage.mts` **in SQL over the direct Postgres connection**,
+specifically so no service_role key was needed.
+
+The database stores a *path* inside the bucket, not a URL, so the project can
+change bucket, region or CDN without rewriting rows.
+`lib/product-image.ts` resolves bucket paths, local `/public` files and
+absolute URLs alike, and falls back to the placeholder for anything missing —
+the grid can never render a broken tile.
+
+`next.config.ts` and `lib/product-image.ts` read the same
+`NEXT_PUBLIC_SUPABASE_STORAGE_HOST` variable so they cannot drift.
+
+**CONTENT.md section 3 was rewritten to be executable by the shop owner**:
+dashboard → Storage → `products` → upload → copy the file name. No terminal.
+One honest caveat is stated there — attaching a photo to a product still means
+typing one line in the catalogue file, because there is no admin panel yet.
+
+### 2 — Order notifications
+
+Cash-on-delivery orders used to land nowhere. Now `persistOrder()` dispatches
+an email **after the transaction commits**, never inside it.
+
+- `Order.notifiedAt` records a confirmed send; null means "still owed".
+- The email carries reference, name, phone, address, line items and total, as
+  both HTML and plain text.
+- Failure never blocks or rolls back an order — it logs with the reference and
+  leaves `notifiedAt` null.
+- Missing config logs a warning and skips; it never crashes the order path.
+- `scripts/resend-unnotified.ts` retries everything still owed (`--dry-run` to
+  list first).
+
+No Supabase key and no Supabase client: dispatch runs in the Next.js process
+over the existing Prisma connection, so the service_role risk is eliminated
+rather than mitigated.
+
+One design change came out of testing: the module originally read its config
+into module-level constants, which froze whatever the environment was at import
+time. ESM hoists imports above any test's env setup, so the invalid-key
+scenario silently ran as the missing-config scenario. Config is now read at
+call time.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| COD order, notifications unconfigured | Order saved, `notifiedAt` null, warning logged naming both missing vars |
+| COD order, **invalid API key** | Order saved, `notifiedAt` null, `API key is invalid` logged with the reference |
+| `resend-unnotified --dry-run` | Listed all pending orders, sent nothing |
+| `resend-unnotified` with no credentials | Refused, changed nothing |
+| Notification contract (7 tests, Resend mocked) | Stamps only on confirmed send; never stamps on error or throw; escapes customer text in HTML; stamped orders drop out of the retry set |
+| `/track` disclosure (5 tests) | Wrong-phone and missing-reference responses byte-identical; refused response leaks no order data |
+| Bucket public-read | Anonymous GET returns `Object not found`, not an auth error |
+| Image URL resolution | Bucket path, local path, absolute URL and null all resolve correctly |
+| `next/image` host allowlist | Allowlisted host → *"url is valid but upstream response is invalid"*; unlisted control → *"url is not allowed"* |
+| Supabase keys in env or tracked files | **None** |
+| Test orders afterwards | All removed; order count 0 |
+
+### Not verified
+
+**No email was actually delivered.** There is no `RESEND_API_KEY` in this
+environment, so the success path was proven with the provider mocked, and the
+two real failure paths were exercised against live code. The remaining unproven
+link is Resend's actual delivery — run one real COD order once the key is set.
+
+**No image object was uploaded.** Uploading object *bytes* requires the Storage
+HTTP API and therefore a Supabase key, which this project deliberately does not
+hold. Everything either side of the upload is verified: the bucket serves
+public reads, URLs resolve correctly, and `next/image` accepts the host. The
+upload itself is the dashboard procedure in CONTENT.md — do one and confirm the
+tile renders.

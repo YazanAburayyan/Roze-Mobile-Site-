@@ -122,19 +122,101 @@ and `lib/orders.ts`.
 
 ---
 
+## 2a. Authorization model
+
+**This is a deliberate decision, not an inherited default.** It was measured,
+reviewed and confirmed. Do not "fix" it without reading this whole section.
+
+### How it works today
+
+| Path | Enforcement |
+|---|---|
+| The Next.js app (Prisma) | Connects as `postgres`, which has `rolbypassrls = true`. **RLS does not apply.** |
+| PostgREST / the public API | RLS is enabled on all tables with **zero policies** → deny-all. |
+| Authorization for real | **Server actions.** Nothing in the database enforces it. |
+
+Verified role-by-role: `anon` and `authenticated` can read no rows and write no
+rows on any table. `service_role` bypasses RLS — that key must never leave the
+server, and this project holds no Supabase keys at all.
+
+### Why this is the right shape here
+
+The app is server-rendered, has no login, and does no client-side database
+access. Prisma connects as a privileged role, so RLS *cannot* enforce anything
+on the app's own queries. Server actions are therefore the only place
+authorization can actually live. RLS-enabled-with-no-policies is exactly the
+backstop we want on the PostgREST path: closed by default.
+
+Concretely, `/track` is the only endpoint that exposes customer data, and it
+requires an order reference **and** a matching phone number, is rate limited to
+8 requests/minute per IP, and returns byte-identical responses for "wrong
+phone" and "no such reference". That last property is asserted by
+`lib/track-security.test.ts`.
+
+### The trap — read this before adding any client-side Supabase access
+
+If someone adds a Supabase client with the anon key, **every query will return
+empty**, because RLS is on and no policy grants anything. The intuitive fix is
+to add a permissive policy. Do not do that.
+
+`Order` holds customer names, phone numbers and delivery addresses. A
+`using (true)` policy on that table makes all of it readable by anyone holding
+the anon key — and **the anon key is a public value**, shipped to every
+browser. That is a customer-data breach, reached by a one-line "fix" that looks
+like it is simply turning the feature on.
+
+**Adding client-side access requires writing real per-row policies first, not
+opening the tables.** For `Product`, `Category` and `Brand`, a read-only
+`using (true)` is genuinely fine — that data is already public on the
+storefront. For `Order` and `ServiceRequest` it is not, and there is no user
+identity to scope a policy to, because there are no accounts. Solve the
+identity question before the policy question.
+
+The current, correct state:
+
+```
+Do not write permissive policies.
+Do not add a Supabase client.
+Do not put any Supabase key in the environment.
+```
+
+---
+
 ## 3. Real product photography
 
-The placeholder system is designed so this is a file drop, not a code change.
+Photos live in a **public Supabase Storage bucket named `products`**. Public
+read, no signed URLs: a retail catalogue's product photos are public by
+definition, and signing them would add expiry handling and defeat CDN caching
+for no benefit.
 
-1. Put images in `public/products/`.
-2. Set `ProductImage.url` to `/products/<filename>` (see CONTENT.md §3).
+**The database stores a path inside the bucket** (`iphone-15-pro.webp`), never
+a full URL — so the project can change bucket, region or CDN without rewriting
+every row. `lib/product-image.ts` resolves it:
 
-`lib/product-image.ts` returns the placeholder whenever a product has no image,
-so a half-finished photo shoot degrades gracefully instead of showing broken
-images. Nothing needs to be switched on.
+| Stored value | Resolves to |
+|---|---|
+| `iphone-15-pro.webp` | `https://<host>/storage/v1/object/public/products/iphone-15-pro.webp` |
+| `/products/local.jpg` | served from `public/` as-is |
+| `https://cdn…/a.jpg` | passed through unchanged |
+| empty / null | the placeholder — the grid never shows a broken tile |
 
-**If photos move to a CDN**, add the host to `images.remotePatterns` in
-`next.config.ts` — `next/image` blocks unlisted remote hosts by design.
+Two pieces of config must agree, and both read the same variable so they
+cannot drift:
+
+- `NEXT_PUBLIC_SUPABASE_STORAGE_HOST` — e.g. `abcdefgh.supabase.co`. **Not a
+  credential**; it is the public hostname in every image URL. It lives in an
+  env var so the project ref is not hardcoded into a public repo.
+- `next.config.ts` `images.remotePatterns` — `next/image` refuses to optimise an
+  unlisted remote host, and an unlisted host shows as a *broken image*, not a
+  warning.
+
+The bucket enforces a **2 MB limit** and accepts only `image/webp`,
+`image/jpeg`, `image/png` and `image/avif`. It was created by
+`scripts/setup-storage.mts`, which uses SQL over the direct Postgres connection
+precisely so no Supabase key is needed. That script is idempotent.
+
+**The upload procedure is deliberately not a developer task** — the shop owner
+does it from the Supabase dashboard. See CONTENT.md section 3.
 
 ---
 
