@@ -1,0 +1,315 @@
+// ---------------------------------------------------------------------------
+// ROZE storefront — Prisma schema
+//
+// Provider is `postgresql`, hosted on Supabase (eu-central-1).
+//
+// Two URLs, and the distinction matters:
+//   DATABASE_URL — the transaction-mode POOLER on :6543 (pgbouncer=true).
+//                  Used by the running app. PgBouncer in transaction mode
+//                  cannot hold prepared statements across a connection, which
+//                  is why the pgbouncer=true flag is required.
+//   DIRECT_URL   — a session-mode connection on :5432, used by Prisma for
+//                  migrations and introspection only. Migrations need a
+//                  session-scoped connection and will fail through the
+//                  transaction pooler.
+// See EXTENDING.md section 2.
+//
+// i18n convention: every user-facing text field has both `*Ar` and `*En`
+// variants. No exceptions. Brand names are the one deliberate non-text
+// exception (see Brand model) because brand names are never translated.
+//
+// Money convention: every money field is an Int counted in FILS, not JOD.
+// 1 JOD = 1000 fils. This keeps all money math integer (no float rounding
+// errors). Never store a Float/Decimal for a price — multiply/divide by
+// 1000 only at the display boundary.
+// ---------------------------------------------------------------------------
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Catalogue
+// ---------------------------------------------------------------------------
+
+/// Self-referencing category tree — supports ARBITRARY nesting depth.
+/// The current catalogue is 4 top-level peers (mobile phones, laptops &
+/// computers, entertainment/gaming, maintenance), each with device +
+/// accessory sub-categories underneath, but the model does not hardcode
+/// that shape — parentId/children allow any depth.
+model Category {
+  id       String  @id @default(cuid())
+  slug     String  @unique
+  parentId String?
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Restrict)
+  children Category[] @relation("CategoryTree")
+
+  nameAr        String
+  nameEn        String
+  descriptionAr String?
+  descriptionEn String?
+
+  /// lucide-react icon name, e.g. "smartphone", "laptop", "gamepad-2", "wrench"
+  icon String?
+
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  // SEO
+  metaTitleAr       String?
+  metaTitleEn       String?
+  metaDescriptionAr String?
+  metaDescriptionEn String?
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([parentId])
+}
+
+/// Brand names are Latin-only and never translated (e.g. "Samsung", "Apple",
+/// "HP") — this is the one field in the catalogue that intentionally has no
+/// Ar/En split, per BRAND_FACTS.md voice guidance ("device model names ...
+/// are never translated").
+model Brand {
+  id   String @id @default(cuid())
+  slug String @unique
+  name String
+
+  descriptionAr String?
+  descriptionEn String?
+  logo          String?
+
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id   String @id @default(cuid())
+  slug String @unique
+  sku  String @unique
+
+  titleAr String
+  titleEn String
+
+  descriptionAr String
+  descriptionEn String
+
+  shortDescAr String?
+  shortDescEn String?
+
+  /// Price in FILS (1 JOD = 1000 fils). Integer only — never Float.
+  price Int
+  /// "Was" price for showing a discount, also in FILS. Null = no discount shown.
+  compareAtPrice Int?
+
+  stockQuantity Int @default(0)
+  /// Derived from stockQuantity > 0 but stored (not computed) so listing
+  /// queries can filter/sort on it without recalculating per row. Keep in
+  /// sync whenever stockQuantity changes.
+  inStock Boolean @default(false)
+
+  isFeatured   Boolean @default(false)
+  isNewArrival Boolean @default(false)
+  isActive     Boolean @default(true)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  brandId String?
+  brand   Brand?  @relation(fields: [brandId], references: [id], onDelete: SetNull)
+
+  images     ProductImage[]
+  attributes Attribute[]
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([slug])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  url   String
+  altAr String
+  altEn String
+
+  sortOrder Int     @default(0)
+  isPrimary Boolean @default(false)
+
+  @@index([productId])
+}
+
+/// A single spec row for a product's specs table, e.g.
+/// nameAr "الشاشة" / nameEn "Display", valueAr "6.7 إنش" / valueEn "6.7-inch".
+/// `group` lets the UI cluster rows under a heading (e.g. "Display",
+/// "Battery", "Camera") within the specs table.
+model Attribute {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  nameAr  String
+  nameEn  String
+  valueAr String
+  valueEn String
+
+  group     String?
+  sortOrder Int     @default(0)
+
+  @@index([productId])
+}
+
+// ---------------------------------------------------------------------------
+// Maintenance / repair
+// ---------------------------------------------------------------------------
+
+/// The maintenance catalogue — repair/service offerings. `deviceType` is a
+/// SQLite string standing in for an enum; SQLite has no native enum type.
+/// Allowed values: "phone" | "laptop" | "console" | "other".
+model ServiceType {
+  id   String @id @default(cuid())
+  slug String @unique
+
+  nameAr        String
+  nameEn        String
+  descriptionAr String
+  descriptionEn String
+
+  /// Allowed values: "phone" | "laptop" | "console" | "other"
+  deviceType String
+
+  /// Repair prices are ranges, not fixed amounts, hence min/max rather than
+  /// a single price. Both in FILS. Null = "quote on inspection".
+  priceMinFils Int?
+  priceMaxFils Int?
+
+  estimatedHours Int?
+  warrantyDays   Int?
+
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  serviceRequests ServiceRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// A maintenance booking submitted from the site. `deviceType` mirrors
+/// ServiceType.deviceType (same allowed-value string convention:
+/// "phone" | "laptop" | "console" | "other") but is stored independently
+/// here because a request can be free-text ("other") even when no matching
+/// ServiceType exists yet, and because this is a point-in-time customer
+/// statement, not a catalogue reference.
+model ServiceRequest {
+  id        String @id @default(cuid())
+  reference String @unique
+
+  customerName  String
+  customerPhone String
+
+  /// Allowed values: "phone" | "laptop" | "console" | "other"
+  deviceType  String
+  deviceModel String?
+
+  serviceTypeId String?
+  serviceType   ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: SetNull)
+
+  issueDescription String
+  preferredTime    DateTime?
+
+  /// Allowed values: "new" | "contacted" | "in_progress" | "completed" | "cancelled"
+  status String @default("new")
+  notes  String?
+
+  createdAt DateTime @default(now())
+
+  @@index([customerPhone])
+}
+
+// ---------------------------------------------------------------------------
+// Orders
+// ---------------------------------------------------------------------------
+
+model Order {
+  id        String @id @default(cuid())
+  /// Human-readable reference, e.g. "ROZE-8F3K2A".
+  reference String @unique
+
+  customerName  String
+  customerPhone String
+
+  /// One of the governorate `value`s defined in lib/site.ts (e.g. "amman").
+  governorate String
+  area        String
+  street      String
+  notes       String?
+
+  /// All amounts in FILS (1 JOD = 1000 fils), integer only.
+  subtotalFils Int
+  shippingFils Int
+  totalFils    Int
+
+  /// Allowed values today: "cod" | "whatsapp". Kept as a plain String (not
+  /// an enum) because a PaymentProvider interface/gateway is coming in a
+  /// later task — adding a third method then must not require a migration.
+  paymentMethod String
+
+  /// Allowed values: "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled"
+  status String @default("pending")
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // The order-lookup page always queries by customerPhone AND reference
+  // together (never reference alone), so both are indexed for that
+  // combined lookup rather than relying on the unique index on reference.
+  @@index([customerPhone, reference])
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  /// Nullable so deleting a product never destroys order history.
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  /// Denormalised snapshot of the product at purchase time. Order history
+  /// must not change retroactively when a product's price/title/sku
+  /// changes later, so these are copied in at checkout, not looked up
+  /// live from Product.
+  titleAr       String
+  titleEn       String
+  sku           String
+  unitPriceFils Int
+
+  quantity      Int
+  lineTotalFils Int
+
+  @@index([orderId])
+  @@index([productId])
+}

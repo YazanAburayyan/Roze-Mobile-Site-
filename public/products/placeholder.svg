@@ -1,0 +1,23 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Mist background -->
+  <rect width="400" height="400" fill="#B5DDDF"/>
+
+  <!-- Simple centered device glyph (smartphone) -->
+  <!-- This is a deliberate, intentional placeholder design -->
+  <g transform="translate(200, 200)">
+    <!-- Phone body -->
+    <rect x="-50" y="-90" width="100" height="180" rx="8" fill="none" stroke="#1E6A74" stroke-width="3"/>
+
+    <!-- Screen -->
+    <rect x="-45" y="-80" width="90" height="130" rx="4" fill="#1E6A74" opacity="0.15"/>
+
+    <!-- Notch -->
+    <rect x="-20" y="-80" width="40" height="12" rx="6" fill="#B5DDDF"/>
+
+    <!-- Home button -->
+    <circle cx="0" cy="75" r="4" fill="#1E6A74"/>
+
+    <!-- Speaker slot -->
+    <line x1="-15" y1="-85" x2="15" y2="-85" stroke="#1E6A74" stroke-width="1.5" opacity="0.5"/>
+  </g>
+</svg>

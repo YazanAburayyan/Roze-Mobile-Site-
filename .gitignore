@@ -1,0 +1,17 @@
+node_modules/
+.next/
+out/
+build/
+*.log
+.env
+.env*.local
+prisma/dev.db
+prisma/dev.db-journal
+next-env.d.ts
+.DS_Store
+.claude/
+.claude-flow/
+tsconfig.tsbuildinfo
+BUILD_STATE.json
+BUILD_REPORT.txt
+Ref/

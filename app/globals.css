@@ -1,0 +1,361 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   ROZE — Mobiles & Computers · Design System
+   -----------------------------------------------------------------------------
+   COLOR CONTRACT (hard rule, enforced by review):
+   Every hex value in this entire project lives in THIS FILE and nowhere else.
+   No component, page, route handler, inline style, SVG, or MDX file may contain
+   a raw hex, rgb(), or hsl() color. Consume colors only through the Tailwind
+   utilities generated from the @theme block below (bg-teal, text-teal-deep,
+   border-line, …) or through the var(--color-*) custom properties.
+   If you need a color that does not exist here, add it here first.
+
+   DIRECTION CONTRACT:
+   RTL-first (Arabic is the default locale). Logical properties only —
+   no left/right, no margin-left/padding-right, no text-align: left|right.
+   Use inline-start / inline-end / margin-inline / text-align: start.
+
+   FONT CONTRACT:
+   app/layout.tsx must attach these next/font variables to <html>:
+     --font-tajawal   (Tajawal,       display: "swap")
+     --font-poppins   (Poppins,       display: "swap")
+     --font-plex-mono (IBM Plex Mono, display: "swap")
+   The theme families below fall back to system fonts if they are missing.
+   ============================================================================= */
+
+@theme {
+  /* --- Reset Tailwind's stock palettes we shadow, so `teal`/`indigo`
+         always mean the ROZE brand values and never a default ramp. ------- */
+  --color-teal-50: initial;
+  --color-teal-100: initial;
+  --color-teal-200: initial;
+  --color-teal-300: initial;
+  --color-teal-400: initial;
+  --color-teal-500: initial;
+  --color-teal-600: initial;
+  --color-teal-700: initial;
+  --color-teal-800: initial;
+  --color-teal-900: initial;
+  --color-teal-950: initial;
+  --color-indigo-50: initial;
+  --color-indigo-100: initial;
+  --color-indigo-200: initial;
+  --color-indigo-300: initial;
+  --color-indigo-400: initial;
+  --color-indigo-500: initial;
+  --color-indigo-600: initial;
+  --color-indigo-700: initial;
+  --color-indigo-800: initial;
+  --color-indigo-900: initial;
+  --color-indigo-950: initial;
+
+  /* --- Brand colors (pixel-sampled from the logo) ---------------------- */
+  /* Primary. Fills, wide backgrounds, large display type (>=24px).
+     NOT for small text on light grounds — 2.1:1, fails AA. */
+  --color-teal: #66c0c9;
+  /* Text-safe teal on light grounds — 6.1:1, passes AA. Links, small text. */
+  --color-teal-deep: #1e6a74;
+  /* Card backgrounds, form fields, hover states. Logo-ring halo. */
+  --color-mist: #b5dddf;
+  /* Primary text + dark section grounds. Near-pure black, not grey. */
+  --color-ink: #060606;
+  /* Rare accent: warranty / genuine badges, thin dividers. <5% of a screen.
+     Never a background, never body text. */
+  --color-gold: #e1cf7e;
+  /* End of the ring gradient. Gradients + active states only, never alone. */
+  --color-indigo: #525ba2;
+  /* Page ground. */
+  --color-paper: #f4fafa;
+
+  /* --- Supporting values ------------------------------------------------ */
+  --color-line: rgba(6, 6, 6, 0.12);
+  --color-muted: #5c6b6d;
+  /* Hairlines and muted text on ink grounds. */
+  --color-line-invert: rgba(244, 250, 250, 0.16);
+  --color-muted-invert: #b5dddf;
+  /* Added for the UI primitive library (C1): semantic error/danger color.
+     Not in the original brand palette — needed for form validation states
+     (Input/Select/Checkbox aria-invalid text, Badge "danger" variant) since
+     none of the brand colors are AA-safe for small error text on paper.
+     #B3251F on #F4FAFA paper = ~6.2:1, passes WCAG AA for small text. */
+  --color-danger: #b3251f;
+
+  /* --- Typography families --------------------------------------------- */
+  /* Arabic + the default UI face. */
+  --font-arabic: var(--font-tajawal), "Tajawal", system-ui, "Segoe UI", sans-serif;
+  /* Latin: wordmark, brand names, device model names.
+     Tajawal sits in the stack AFTER Poppins on purpose: Poppins has no Arabic
+     glyphs, so without it every Arabic string styled as "latin" (buttons,
+     labels) silently fell back to an arbitrary system Arabic face. With it,
+     Latin runs render in Poppins and Arabic runs render in Tajawal. */
+  --font-latin: var(--font-poppins), "Poppins", var(--font-tajawal), "Tajawal",
+    system-ui, "Segoe UI", sans-serif;
+  /* Numbers, specs tables, phone numbers, part codes, SKUs, prices. */
+  /* Same multi-script reasoning as --font-latin: IBM Plex Mono carries no
+     Arabic, so Arabic falls through to Tajawal rather than a system font. */
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", var(--font-tajawal), "Tajawal",
+    ui-monospace, "Cascadia Mono", "Courier New", monospace;
+  /* Default sans === Arabic, so unstyled text is already correct. */
+  --font-sans: var(--font-tajawal), "Tajawal", system-ui, "Segoe UI", sans-serif;
+
+  /* --- Type scale (fluid) ----------------------------------------------- */
+  --text-display: clamp(2.5rem, 1.6rem + 3.8vw, 4rem); /* 40 -> 64 */
+  --text-display--line-height: 1.15;
+  --text-display--letter-spacing: -0.02em;
+  --text-display--font-weight: 800;
+
+  --text-h1: clamp(2.125rem, 1.5rem + 2.6vw, 3.25rem); /* 34 -> 52 */
+  --text-h1--line-height: 1.15;
+  --text-h1--letter-spacing: -0.02em;
+  --text-h1--font-weight: 800;
+
+  --text-h2: clamp(1.625rem, 1.15rem + 2vw, 2.5rem); /* 26 -> 40 */
+  --text-h2--line-height: 1.25;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h2--font-weight: 800;
+
+  --text-h3: clamp(1.125rem, 1.05rem + 0.35vw, 1.3125rem); /* 18 -> 21 */
+  --text-h3--line-height: 1.35;
+  --text-h3--font-weight: 700;
+
+  --text-body: clamp(1rem, 0.97rem + 0.13vw, 1.0625rem); /* 16 -> 17 */
+  --text-body--line-height: 1.75;
+  --text-body--font-weight: 400;
+
+  --text-small: 0.875rem; /* 14 — never in teal on light */
+  --text-small--line-height: 1.6;
+
+  --text-eyebrow: 0.6875rem; /* 11 */
+  --text-eyebrow--line-height: 1.4;
+  --text-eyebrow--letter-spacing: 0.18em;
+
+  /* --- Radii ------------------------------------------------------------ */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+
+  /* --- Elevation -------------------------------------------------------- */
+  --shadow-roze: 0 2px 8px rgba(6, 6, 6, 0.06), 0 12px 32px rgba(6, 6, 6, 0.06);
+}
+
+/* The signature ring gradient, from the logo. Plain custom property —
+   it is a paint value, not a Tailwind namespace. Use via `.ring-gradient`
+   or `background-image: var(--roze-ring)`. Never recolor it. */
+:root {
+  --roze-ring: linear-gradient(135deg, #b5dddf 0%, #66c0c9 45%, #525ba2 100%);
+  /* Scrim for placing the logo / text over photography (>=60% black). */
+  --roze-scrim: rgba(6, 6, 6, 0.62);
+  /* Content measure for prose. */
+  --roze-measure: 62ch;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.75;
+    font-weight: 400;
+    text-align: start;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Latin runs inside Arabic text (device models, brand names) keep Poppins. */
+  :lang(en) {
+    font-family: var(--font-latin);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    font-weight: 800;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Numbers are always mono — prices, phones, SKUs, spec values. */
+  [data-numeric],
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  a {
+    color: var(--color-teal-deep);
+    text-underline-offset: 0.2em;
+  }
+
+  hr {
+    border: 0;
+    border-block-start: 1px solid var(--color-line);
+  }
+
+  /* Focus: unmistakable, and legible on light AND dark grounds.
+     Indigo core ring + mist halo, so it never disappears on ink. */
+  :focus-visible {
+    outline: 3px solid var(--color-indigo);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 0 0 6px rgba(181, 221, 223, 0.65);
+  }
+
+  /* Never remove the ring for mouse users on the dark plate either. */
+  .on-ink :focus-visible,
+  .logo-plate :focus-visible {
+    outline-color: var(--color-mist);
+    box-shadow: 0 0 0 6px rgba(82, 91, 162, 0.75);
+  }
+
+  ::selection {
+    background-color: var(--color-mist);
+    color: var(--color-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Page container. Everything above the fold and below sits in one of these. */
+  .wrap {
+    inline-size: 100%;
+    max-inline-size: 1080px;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 2rem);
+  }
+
+  /* Small mono label above a heading. */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-eyebrow);
+    line-height: 1.4;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    font-weight: 500;
+    display: block;
+    margin-block-end: 0.5rem;
+  }
+
+  .on-ink .eyebrow {
+    color: var(--color-muted-invert);
+  }
+
+  /* Arabic typography correction.
+     `letter-spacing` breaks the cursive joining between Arabic letters — the
+     word visually falls apart — and `text-transform: uppercase` is a no-op in
+     a script with no letter case. Both are correct for the Latin eyebrow and
+     wrong for the Arabic one, so they are switched off under RTL. */
+  [dir="rtl"] .eyebrow {
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  /* Intro paragraph under a heading. */
+  .lede {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--color-muted);
+    max-inline-size: var(--roze-measure);
+    margin-inline-end: auto;
+    text-wrap: pretty;
+  }
+
+  .on-ink .lede {
+    color: var(--color-mist);
+  }
+
+  /* THE LOGO PLATE.
+     ref/RozeLogo.png has a white circle baked into the artwork: on a white or
+     paper ground the mark visually breaks. This plate is the ONLY sanctioned
+     way to render the logo on a light page. It is always an ink ground, so a
+     logo-on-white failure is structurally impossible.
+     Usage: <span class="logo-plate"><Image src="/RozeLogo.png" …/></span>
+     Clear space (>= half the solid circle's radius) is built into the padding;
+     min-inline-size guards the 120px minimum on-screen width. */
+  .logo-plate {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-ink);
+    background-image: none;
+    border-radius: var(--radius-md);
+    padding-block: 0.75rem;
+    padding-inline: 1rem;
+    min-inline-size: 152px; /* 120px logo + clear space */
+    box-shadow: var(--shadow-roze);
+    /* No border/glow on the mark itself — the plate carries the container. */
+  }
+
+  .logo-plate img,
+  .logo-plate svg {
+    display: block;
+    min-inline-size: 120px;
+    max-inline-size: 100%;
+    block-size: auto;
+  }
+
+  /* Teal variant — the other sanctioned ground for the mark. */
+  .logo-plate--teal {
+    background-color: var(--color-teal);
+  }
+
+  /* Over photography: >=60% black scrim behind the mark. */
+  .logo-plate--scrim {
+    background-color: var(--roze-scrim);
+    backdrop-filter: blur(2px);
+  }
+
+  /* The signature ring gradient as a fill. */
+  .ring-gradient {
+    background-image: var(--roze-ring);
+  }
+
+  /* Same gradient as a 1px border, via two backgrounds and mask-composite. */
+  .ring-gradient-border {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .ring-gradient-border::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background-image: var(--roze-ring);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
