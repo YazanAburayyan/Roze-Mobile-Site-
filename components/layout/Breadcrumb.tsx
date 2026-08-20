@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
+import { cn } from '@/components/ui';
 import type { Locale } from '@/i18n/routing';
 
 export type BreadcrumbItem = { label: string; href: string };
@@ -14,13 +15,23 @@ export type BreadcrumbItem = { label: string; href: string };
  * gets `ChevronLeft`, English gets `ChevronRight`, so the arrow always points
  * toward the next crumb in reading order with no transform hacks.
  */
-export async function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
+export async function Breadcrumb({
+  items,
+  className,
+}: {
+  items: BreadcrumbItem[];
+  /**
+   * Callers that already sit inside a `.wrap` pass their own spacing. The
+   * default keeps the standalone behaviour the other pages rely on.
+   */
+  className?: string;
+}) {
   const t = await getTranslations('a11y');
   const locale = (await getLocale()) as Locale;
   const Separator = locale === 'ar' ? ChevronLeft : ChevronRight;
 
   return (
-    <nav aria-label={t('breadcrumb')} className="wrap py-3">
+    <nav aria-label={t('breadcrumb')} className={cn(className ?? 'wrap py-3')}>
       <ol className="flex flex-wrap items-center gap-1.5 text-small text-muted">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;

@@ -19,6 +19,7 @@ import { alternatesFor, breadcrumbJsonLd, jsonLdScript } from '@/lib/seo';
 import { Breadcrumb } from '@/components/layout';
 import type { BreadcrumbItem } from '@/components/layout';
 import { CatalogView, CategoryTile } from '@/components/commerce';
+import { TrustStrip } from '@/components/home/TrustStrip';
 
 type CategoryTree = Awaited<ReturnType<typeof getCategoryTree>>;
 type CategoryNode = CategoryTree[number];
@@ -185,50 +186,61 @@ export default async function CategoryPage({
     <>
       <script {...jsonLdScript(breadcrumbJsonLd(jsonLdItems, l))} />
 
-      <Breadcrumb items={breadcrumbItems} />
-
-      <div className="wrap flex flex-col gap-8 pb-16">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-h1">{categoryName}</h1>
+      {/*
+        Banner header. The reference put the page name in huge type over a
+        photograph; there is no licensed photography yet, so this is the same
+        idea done typographically on the ink band — and a photo can drop in
+        behind it later without recomposition.
+      */}
+      <section className="band-ink">
+        <div className="wrap py-10 lg:py-14">
+          <Breadcrumb items={breadcrumbItems} className="mb-5" />
+          <h1 className="text-display text-paper">{categoryName}</h1>
           {pick(l, category.descriptionAr, category.descriptionEn) ? (
-            <p className="lede">{pick(l, category.descriptionAr, category.descriptionEn)}</p>
+            <p className="lede mt-3">{pick(l, category.descriptionAr, category.descriptionEn)}</p>
           ) : null}
-        </header>
+        </div>
+      </section>
 
-        {children.length > 0 ? (
-          <section aria-labelledby="subcategories-heading" className="flex flex-col gap-4">
-            <h2 id="subcategories-heading" className="text-h3">
-              {t('subcategories')}
-            </h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {children.map((child) => (
-                <CategoryTile
-                  key={child.id}
-                  href={`${basePath}/${child.slug}`}
-                  label={pick(l, child.nameAr, child.nameEn)}
-                  icon={child.icon}
-                />
-              ))}
-            </div>
-          </section>
-        ) : null}
+      <section className="band-paper">
+        <div className="wrap flex flex-col gap-8 py-10 lg:py-14">
+          {children.length > 0 ? (
+            <section aria-labelledby="subcategories-heading" className="flex flex-col gap-4">
+              <h2 id="subcategories-heading" className="text-h3">
+                {t('subcategories')}
+              </h2>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {children.map((child) => (
+                  <CategoryTile
+                    key={child.id}
+                    href={`${basePath}/${child.slug}`}
+                    label={pick(l, child.nameAr, child.nameEn)}
+                    icon={child.icon}
+                  />
+                ))}
+              </div>
+            </section>
+          ) : null}
 
-        <CatalogView
-          brands={brands.map((b) => ({ slug: b.slug, name: b.name }))}
-          products={result.products}
-          total={result.total}
-          page={result.page}
-          pageCount={result.pageCount}
-          emptyState={{
-            title: t('emptyStateTitle'),
-            body: t('emptyStateBody'),
-            browseHref: '/',
-            browseLabel: t('emptyStateBrowseAction'),
-            contactHref: waHref,
-            contactLabel: t('emptyStateContactAction'),
-          }}
-        />
-      </div>
+          <CatalogView
+            brands={brands.map((b) => ({ slug: b.slug, name: b.name }))}
+            products={result.products}
+            total={result.total}
+            page={result.page}
+            pageCount={result.pageCount}
+            emptyState={{
+              title: t('emptyStateTitle'),
+              body: t('emptyStateBody'),
+              browseHref: '/',
+              browseLabel: t('emptyStateBrowseAction'),
+              contactHref: waHref,
+              contactLabel: t('emptyStateContactAction'),
+            }}
+          />
+        </div>
+      </section>
+
+      <TrustStrip />
     </>
   );
 }

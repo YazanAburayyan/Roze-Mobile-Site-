@@ -4,7 +4,7 @@ import type * as React from "react";
 import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import type { Locale } from "@/i18n/routing";
 import type { listProducts } from "@/lib/catalog";
 import { PLACEHOLDER_IMAGE, productImageUrl } from "@/lib/product-image";
@@ -24,9 +24,17 @@ export interface ProductCardProps {
 /**
  * The whole card is one link to the product page — a customer must be able
  * to open an out-of-stock product and send a WhatsApp enquiry from there.
- * Only the add-to-cart button is disabled when out of stock. The link is
- * layered as a full-bleed overlay (block-link pattern) so the cart button
- * can sit above it without nesting a <button> inside an <a>.
+ * Only the buy controls are disabled when out of stock. The link is layered
+ * as a full-bleed overlay (block-link pattern) so the buttons can sit above
+ * it without nesting a <button> inside an <a>.
+ *
+ * TWO ACTIONS, as in the reference layout: add to cart, and buy now. "Buy
+ * now" is genuine here — it adds the item and goes straight to checkout,
+ * rather than being a second label for the same thing.
+ *
+ * NOT SHOWN, deliberately: a star rating. There are no per-product reviews;
+ * the 4.5 on the homepage is a shop-level Google rating and printing stars
+ * per product would be a fabricated claim.
  */
 export function ProductCard({ product, className }: ProductCardProps) {
   const locale = useLocale() as Locale;
@@ -39,6 +47,34 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const imageAlt = image ? (locale === "ar" ? image.altAr : image.altEn) : title;
   const imageSrc = productImageUrl(image);
   const hasPhoto = imageSrc !== PLACEHOLDER_IMAGE;
+
+  const router = useRouter();
+  const categoryName =
+    locale === "ar" ? product.category.nameAr : product.category.nameEn;
+
+  function addToCart() {
+    add(
+      {
+        productId: product.id,
+        slug: product.slug,
+        sku: product.sku,
+        titleAr: product.titleAr,
+        titleEn: product.titleEn,
+        unitPriceFils: product.price,
+        compareAtPriceFils: product.compareAtPrice,
+        image: productImageUrl(image),
+        maxQuantity: product.stockQuantity,
+      },
+      1
+    );
+  }
+
+  function handleBuyNow(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    if (!product.inStock) return;
+    addToCart();
+    router.push("/checkout");
+  }
 
   function handleAddToCart(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
@@ -101,6 +137,12 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <div className="absolute start-2 top-2 flex flex-col items-start gap-1">
           <StockBadge inStock={product.inStock} stockQuantity={product.stockQuantity} />
         </div>
+
+        {/* Category chip, as in the reference. Real data, not a decorative
+            label — it names the category the product actually sits in. */}
+        <span className="absolute bottom-2 end-2 max-w-[70%] truncate rounded-full bg-surface/90 px-2.5 py-1 text-small text-muted backdrop-blur-sm">
+          {categoryName}
+        </span>
       </div>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
@@ -123,21 +165,38 @@ export function ProductCard({ product, className }: ProductCardProps) {
             size="sm"
           />
 
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            disabled={!product.inStock}
-            aria-label={t("addToCart")}
-            className={cn(
-              "relative z-20 inline-flex h-10 items-center justify-center gap-2 rounded-sm font-latin text-small font-medium transition-colors motion-reduce:transition-none",
-              product.inStock
-                ? "bg-teal text-ink hover:bg-teal-deep hover:text-paper"
-                : "cursor-not-allowed bg-mist/60 text-muted"
-            )}
-          >
-            <ShoppingCart className="size-4" aria-hidden="true" />
-            {product.inStock ? tCommon("addToCart") : t("outOfStock")}
-          </button>
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={!product.inStock}
+              className={cn(
+                "relative z-20 inline-flex h-10 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border px-3 text-small font-medium transition-colors motion-reduce:transition-none",
+                product.inStock
+                  ? "border-line bg-surface text-ink hover:bg-mist"
+                  : "cursor-not-allowed border-line bg-sand text-muted"
+              )}
+            >
+              <ShoppingCart className="size-4 shrink-0" aria-hidden="true" />
+              <span className="truncate">
+                {product.inStock ? tCommon("addToCart") : t("outOfStock")}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleBuyNow}
+              disabled={!product.inStock}
+              className={cn(
+                "relative z-20 inline-flex h-10 min-w-0 flex-1 items-center justify-center rounded-full px-3 text-small font-medium transition-colors motion-reduce:transition-none",
+                product.inStock
+                  ? "bg-ink text-paper hover:bg-teal-deep"
+                  : "cursor-not-allowed bg-sand text-muted"
+              )}
+            >
+              <span className="truncate">{tCommon("buyNow")}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
