@@ -1,7 +1,7 @@
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, Star } from 'lucide-react';
 import { getTranslations, getLocale } from 'next-intl/server';
 import type { Locale } from '@/i18n/routing';
-import { address, schemaDays } from '@/lib/site';
+import { address, schemaDays, reputation } from '@/lib/site';
 import { groupedHours } from '@/lib/hours';
 import { buttonClasses } from '@/components/ui';
 
@@ -14,11 +14,15 @@ function fmtHour(hour: number): string {
 }
 
 /**
- * Store location. No Google Maps iframe — that needs an API key nobody has
- * yet and would leak visitor data to Google on every homepage load. Instead:
- * a plain styled card with a decorative pin motif in the brand's ring
- * gradient, the real address, and a "get directions" link straight to the
- * confirmed Google Maps place (address.mapsUrl from lib/site.ts).
+ * Store location, with the Google rating folded in.
+ *
+ * The rating used to be its own band directly above this one — a lone card in
+ * an empty strip, which read as an ornament. It is evidence ABOUT this shop
+ * and it links to the same Google place as "get directions", so it belongs
+ * here beside the address rather than floating on its own.
+ *
+ * No Google Maps iframe: it needs an API key nobody has yet and would leak
+ * visitor data to Google on every homepage load.
  */
 export async function LocationSection() {
   const t = await getTranslations();
@@ -27,8 +31,44 @@ export async function LocationSection() {
 
   return (
     <section id="contact" className="band-sand scroll-mt-24"><div className="wrap py-12 lg:py-16">
-      <span className="eyebrow">{t('home.findUs')}</span>
-      <h2 className="text-h2 text-ink">{t('contact.visitTheShop')}</h2>
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <span className="eyebrow">{t('home.findUs')}</span>
+          <h2 className="text-h2 text-ink">{t('contact.visitTheShop')}</h2>
+        </div>
+
+        {/* Google rating as a credential on the shop, not a separate band. */}
+        <a
+          href={address.mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex shrink-0 items-center gap-3 rounded-md border border-line bg-surface px-4 py-3 shadow-roze transition-transform duration-200 ease-out hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+        >
+          <span className="text-h2 leading-none text-ink" data-numeric dir="ltr" aria-hidden="true">
+            {reputation.ratingValue}
+          </span>
+          <span className="flex flex-col gap-1">
+            <span aria-hidden="true" className="flex items-center gap-0.5">
+              {Array.from({ length: 5 }, (_, i) => (
+                <Star
+                  key={i}
+                  className={
+                    i < Math.round(reputation.ratingValue)
+                      ? 'size-3.5 fill-gold text-gold'
+                      : 'size-3.5 fill-transparent text-line'
+                  }
+                />
+              ))}
+            </span>
+            <span className="text-small text-muted group-hover:text-teal-deep" data-numeric>
+              {t('footer.googleReviews', { count: reputation.reviewCount })}
+            </span>
+          </span>
+          <span className="sr-only">
+            {t('home.ratingLabel', { rating: reputation.ratingValue, count: reputation.reviewCount })}
+          </span>
+        </a>
+      </div>
 
       <div className="mt-6 grid gap-6 overflow-hidden rounded-lg border border-line bg-paper shadow-roze lg:grid-cols-2">
         {/*

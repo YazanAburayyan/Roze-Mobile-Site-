@@ -14,7 +14,6 @@ import { TrustStrip } from '@/components/home/TrustStrip';
 import { CategoryStrip } from '@/components/home/CategoryStrip';
 import { ProductRail } from '@/components/home/ProductRail';
 import { MaintenanceCta } from '@/components/home/MaintenanceCta';
-import { RatingSection } from '@/components/home/RatingSection';
 import { LocationSection } from '@/components/home/LocationSection';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -37,9 +36,14 @@ export async function generateMetadata(): Promise<Metadata> {
  * always meant to do. If a merchandising rail is wanted back later, add it
  * here — but not three of them.
  *
- * Band rhythm: ink hero -> sand trust -> paper categories -> paper rail ->
- * INK maintenance -> paper rating -> sand location -> ink footer. The two dark
+ * Band rhythm: ink hero -> sand trust -> paper about -> paper categories ->
+ * paper rail -> INK maintenance -> sand location -> ink footer. The two dark
  * bands give the page a spine.
+ *
+ * The Google rating used to be its own band between maintenance and location.
+ * It is evidence about the shop and links to the same Google place as "get
+ * directions", so it now sits inside the location section instead of floating
+ * alone in a strip of its own.
  *
  * Everything reads from lib/catalog (never Prisma), lib/site.ts (never a typed
  * phone/address/hour) and next-intl (never a hardcoded string).
@@ -73,7 +77,6 @@ export default async function HomePage({
       />
 
       <MaintenanceCta />
-      <RatingSection />
       <LocationSection />
     </>
   );
