@@ -49,6 +49,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const hasPhoto = imageSrc !== PLACEHOLDER_IMAGE;
 
   const router = useRouter();
+  const shortDescription =
+    locale === "ar" ? product.shortDescAr : product.shortDescEn;
   const categoryName =
     locale === "ar" ? product.category.nameAr : product.category.nameEn;
 
@@ -119,7 +121,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <span className="sr-only">{title}</span>
       </Link>
 
-      <div className="relative aspect-square w-full overflow-hidden border-b border-line">
+      <div className="relative aspect-square w-full overflow-hidden border-b border-line bg-surface p-3">
         {hasPhoto ? (
           <Image
             src={imageSrc}
@@ -134,18 +136,14 @@ export function ProductCard({ product, className }: ProductCardProps) {
         {!product.inStock ? (
           <div className="absolute inset-0 bg-paper/50" aria-hidden="true" />
         ) : null}
-        <div className="absolute start-2 top-2 flex flex-col items-start gap-1">
-          <StockBadge inStock={product.inStock} stockQuantity={product.stockQuantity} />
-        </div>
-
         {/* Category chip, as in the reference. Real data, not a decorative
             label — it names the category the product actually sits in. */}
-        <span className="absolute bottom-2 end-2 max-w-[70%] truncate rounded-full bg-surface/90 px-2.5 py-1 text-small text-muted backdrop-blur-sm">
+        <span className="absolute end-2 top-2 max-w-[70%] truncate rounded-full bg-sand/90 px-2.5 py-1 text-small text-muted backdrop-blur-sm">
           {categoryName}
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-2 p-4">
+      <div className="flex flex-1 flex-col items-center gap-1.5 p-4 text-center">
         {product.brand ? (
           <span lang="en" className="font-latin text-small font-medium text-muted">
             {product.brand.name}
@@ -154,49 +152,76 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
         <h3 className="line-clamp-2 text-body font-medium text-ink">{title}</h3>
 
-        <span dir="ltr" className="font-mono text-small text-muted">
-          {product.sku}
-        </span>
+        {/* The reference put a short spec line under the title. shortDesc is
+            real per-product copy from the catalogue; the SKU is the fallback
+            so the slot is never empty and the cards stay the same height. */}
+        {shortDescription ? (
+          <p className="line-clamp-2 text-small leading-snug text-muted">
+            {shortDescription}
+          </p>
+        ) : (
+          <span dir="ltr" className="font-mono text-small text-muted">
+            {product.sku}
+          </span>
+        )}
 
-        <div className="mt-auto flex flex-col gap-3">
+        {/* Bottom row mirrors the reference's rating-left / price-right rhythm.
+            The left slot is STOCK, not stars: there are no per-product reviews
+            and the 4.5 on the homepage is a shop-level Google rating, so a star
+            row here would be a fabricated claim. Stock is the fact a shopper
+            actually needs at a glance. */}
+        <div className="mt-auto flex w-full items-center justify-between gap-2 pt-3">
+          <StockBadge inStock={product.inStock} stockQuantity={product.stockQuantity} />
           <PriceDisplay
             priceFils={product.price}
             compareAtPriceFils={product.compareAtPrice}
             size="sm"
+            className="justify-end text-end"
           />
+        </div>
 
-          <div className="flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              disabled={!product.inStock}
-              className={cn(
-                "relative z-20 inline-flex h-10 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-full border px-3 text-small font-medium transition-colors motion-reduce:transition-none",
-                product.inStock
-                  ? "border-line bg-surface text-ink hover:bg-mist"
-                  : "cursor-not-allowed border-line bg-sand text-muted"
-              )}
-            >
-              <ShoppingCart className="size-4 shrink-0" aria-hidden="true" />
-              <span className="truncate">
-                {product.inStock ? tCommon("addToCart") : t("outOfStock")}
-              </span>
-            </button>
+        {/* Actions stay out of the way on pointer devices, as in the reference,
+            but reveal on hover AND on focus-within so they remain keyboard
+            reachable. Below lg (touch, where there is no hover) they are
+            always visible — a hover-only buy button is unusable on a phone. */}
+        <div
+          className={cn(
+            "flex w-full flex-col gap-2 pt-3",
+            "lg:opacity-0 lg:transition-opacity lg:duration-200",
+            "lg:group-hover:opacity-100 lg:group-focus-within:opacity-100",
+            "motion-reduce:lg:transition-none"
+          )}
+        >
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={!product.inStock}
+            className={cn(
+              "relative z-20 inline-flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-full border px-3 text-small font-medium transition-colors motion-reduce:transition-none",
+              product.inStock
+                ? "border-line bg-surface text-ink hover:bg-mist"
+                : "cursor-not-allowed border-line bg-sand text-muted"
+            )}
+          >
+            <ShoppingCart className="size-4 shrink-0" aria-hidden="true" />
+            <span className="truncate">
+              {product.inStock ? tCommon("addToCart") : t("outOfStock")}
+            </span>
+          </button>
 
-            <button
-              type="button"
-              onClick={handleBuyNow}
-              disabled={!product.inStock}
-              className={cn(
-                "relative z-20 inline-flex h-10 min-w-0 flex-1 items-center justify-center rounded-full px-3 text-small font-medium transition-colors motion-reduce:transition-none",
-                product.inStock
-                  ? "bg-ink text-paper hover:bg-teal-deep"
-                  : "cursor-not-allowed bg-sand text-muted"
-              )}
-            >
-              <span className="truncate">{tCommon("buyNow")}</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleBuyNow}
+            disabled={!product.inStock}
+            className={cn(
+              "relative z-20 inline-flex h-9 min-w-0 items-center justify-center rounded-full px-3 text-small font-medium transition-colors motion-reduce:transition-none",
+              product.inStock
+                ? "bg-ink text-paper hover:bg-teal-deep"
+                : "cursor-not-allowed bg-sand text-muted"
+            )}
+          >
+            <span className="truncate">{tCommon("buyNow")}</span>
+          </button>
         </div>
       </div>
     </div>
