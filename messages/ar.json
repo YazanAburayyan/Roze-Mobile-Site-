@@ -34,7 +34,8 @@
     "contact": "اتصل بنا",
     "about": "عن روز",
     "trackOrder": "تتبع الطلب",
-    "allCategories": "كل الفئات"
+    "allCategories": "كل الفئات",
+    "shop": "المتجر"
   },
   "header": {
     "searchPlaceholder": "دوّر على جهاز، ماركة، أو قطعة",
@@ -52,7 +53,10 @@
     "maintenancePhone": "+962 796 003040",
     "cartItemCount": "{count, plural, zero {لا عناصر} one {عنصر واحد} two {عنصران} few {# عناصر} many {# عنصراً} other {# عنصر}}",
     "brandMark": "ROZE",
-    "brandMarkSub": "موبايلات وكمبيوترات"
+    "brandMarkSub": "موبايلات وكمبيوترات",
+    "closesIn": "يسكّر بعد {time}",
+    "opensIn": "يفتح بعد {time}",
+    "sectionsLabel": "أقسام الصفحة"
   },
   "hero": {
     "headline": "بيع وصيانة تحت سقف واحد",

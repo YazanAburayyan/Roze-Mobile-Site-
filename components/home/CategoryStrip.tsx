@@ -29,7 +29,7 @@ export async function CategoryStrip() {
   const Arrow = locale === 'ar' ? ArrowLeft : ArrowRight;
 
   return (
-    <section id="categories" className="band-paper">
+    <section id="shop" className="band-paper scroll-mt-24">
       <div className="wrap py-12 lg:py-16">
         <h2 className="text-h2 text-ink">{t('nav.allCategories')}</h2>
 

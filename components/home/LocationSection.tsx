@@ -26,7 +26,7 @@ export async function LocationSection() {
   const hourGroups = groupedHours();
 
   return (
-    <section className="band-sand"><div className="wrap py-12 lg:py-16">
+    <section id="contact" className="band-sand scroll-mt-24"><div className="wrap py-12 lg:py-16">
       <span className="eyebrow">{t('home.findUs')}</span>
       <h2 className="text-h2 text-ink">{t('contact.visitTheShop')}</h2>
 

@@ -19,15 +19,24 @@ export type ShopStatus = {
   opensAt: string | null;
   /** "HH:MM" when the shop closes, if currently open. */
   closesAt: string | null;
+  /**
+   * Seconds until the shop next opens or closes.
+   *
+   * Drives the header countdown. Computed from the same Amman wall clock as
+   * everything else here, so it never disagrees with the open/closed state
+   * beside it.
+   */
+  secondsUntilChange: number;
 };
 
 /** Wall-clock day + minute-of-day in Amman, independent of the host clock. */
-function ammanNow(now: Date): { day: number; minutes: number } {
+function ammanNow(now: Date): { day: number; minutes: number; seconds: number } {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: TIMEZONE,
     weekday: 'short',
     hour: '2-digit',
     minute: '2-digit',
+    second: '2-digit',
     hour12: false,
   }).formatToParts(now);
 
@@ -48,7 +57,9 @@ function ammanNow(now: Date): { day: number; minutes: number } {
   const hour = Number(get('hour')) % 24;
   const minute = Number(get('minute'));
 
-  return { day, minutes: hour * 60 + minute };
+  const second = Number(get('second')) || 0;
+
+  return { day, minutes: hour * 60 + minute, seconds: second };
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -60,13 +71,21 @@ function dayHours(index: number): DayHours {
 }
 
 export function getShopStatus(now: Date = new Date()): ShopStatus {
-  const { day, minutes } = ammanNow(now);
+  const { day, minutes, seconds } = ammanNow(now);
   const today = dayHours(day);
 
   const openMin = today.open * 60;
   const closeMin = today.close * 60; // 24:00 -> 1440, i.e. end of this day
 
   const isOpen = minutes >= openMin && minutes < closeMin;
+
+  /**
+   * Whole seconds from now until a given minute-of-day boundary.
+   * The `seconds` component is subtracted so the countdown ticks down smoothly
+   * jumping a whole minute at a time.
+   */
+  const until = (targetMinute: number) =>
+    Math.max(0, (targetMinute - minutes) * 60 - seconds);
 
   if (isOpen) {
     return {
@@ -75,16 +94,33 @@ export function getShopStatus(now: Date = new Date()): ShopStatus {
       minutes,
       opensAt: null,
       closesAt: hhmm(today.close),
+      secondsUntilChange: until(closeMin),
     };
   }
 
-  // Closed. Find the next opening: later today, else the next day that opens.
+  // Closed, but opening later the same day.
   if (minutes < openMin) {
-    return { isOpen: false, day, minutes, opensAt: hhmm(today.open), closesAt: null };
+    return {
+      isOpen: false,
+      day,
+      minutes,
+      opensAt: hhmm(today.open),
+      closesAt: null,
+      secondsUntilChange: until(openMin),
+    };
   }
 
+  // Closed for the night: the next opening is tomorrow's, so the wait spans
+  // midnight and the remaining minutes of today are added on.
   const tomorrow = dayHours(day + 1);
-  return { isOpen: false, day, minutes, opensAt: hhmm(tomorrow.open), closesAt: null };
+  return {
+    isOpen: false,
+    day,
+    minutes,
+    opensAt: hhmm(tomorrow.open),
+    closesAt: null,
+    secondsUntilChange: until(24 * 60 + tomorrow.open * 60),
+  };
 }
 
 /**

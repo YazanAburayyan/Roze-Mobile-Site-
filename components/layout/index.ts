@@ -9,3 +9,5 @@ export { OpenStatusBadge } from './OpenStatusBadge';
 export { LocaleSwitch } from './LocaleSwitch';
 export { CartButton } from './CartButton';
 export { SearchBar } from './SearchBar';
+export { TopBar } from './TopBar';
+export { HOME_SECTIONS, type HomeSection } from './home-sections';

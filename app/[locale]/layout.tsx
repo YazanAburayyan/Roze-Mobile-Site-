@@ -8,6 +8,7 @@ import { Tajawal, Poppins, IBM_Plex_Mono } from 'next/font/google';
 import { routing, localeDirection, isLocale, type Locale } from '@/i18n/routing';
 import { SITE_URL, site } from '@/lib/site';
 import { Header, Footer } from '@/components/layout';
+import { TopBar } from '@/components/layout/TopBar';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 import '../globals.css';
 
@@ -114,6 +115,7 @@ export default async function LocaleLayout({
           >
             {t('skipToMain')}
           </a>
+          <TopBar />
           <Header />
           <main id="main-content" className="flex-1">
             {children}

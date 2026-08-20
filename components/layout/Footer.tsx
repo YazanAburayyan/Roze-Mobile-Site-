@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { MapPin, Phone, MessageCircle, Facebook, Star } from 'lucide-react';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
@@ -65,14 +64,7 @@ export async function Footer() {
         <div className="flex flex-col gap-4 border-b border-line pb-10 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-4">
             <Link href="/" aria-label={site.name[locale]} className="inline-block">
-              <Image
-                src="/logo/roze-logo.png"
-                alt={site.name[locale]}
-                width={160}
-                height={89}
-                sizes="160px"
-                className="h-auto w-[140px] sm:w-40"
-              />
+              <span className="wordmark text-h3">{t('header.brandMark')}</span>
             </Link>
             {/* NOT site.tagline — that string is the brand guide's explanation of what
                 the mark means ("two intersecting circles"). Brand rationale must never

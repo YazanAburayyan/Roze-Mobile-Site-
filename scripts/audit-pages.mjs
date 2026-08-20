@@ -76,7 +76,9 @@ for (const p of PATHS) {
     // Brand rule: the logo must never sit on a light ground.
     if (/<img[^>]*roze-logo/.test(html)) {
       const idx = html.search(/<img[^>]*roze-logo/);
-      const context = html.slice(Math.max(0, idx - 400), idx);
+      // Window widened from 400: the ink ground is now declared on <header>/
+      // <footer> itself, which sits further back than a wrapper div did.
+      const context = html.slice(Math.max(0, idx - 4000), idx);
       if (!/band-ink|bg-ink|bg-teal|on-ink/.test(context)) {
         add(page, 'logo-on-light', 'no plate/ink ancestor');
       }

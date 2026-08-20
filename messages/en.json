@@ -34,7 +34,8 @@
     "contact": "Contact us",
     "about": "About Roze",
     "trackOrder": "Track order",
-    "allCategories": "All categories"
+    "allCategories": "All categories",
+    "shop": "Shop"
   },
   "header": {
     "searchPlaceholder": "Search for a device, brand, or part",
@@ -52,7 +53,10 @@
     "maintenancePhone": "+962 796 003040",
     "cartItemCount": "{count, plural, one {1 item} other {# items}}",
     "brandMark": "ROZE",
-    "brandMarkSub": "Mobiles & Computers"
+    "brandMarkSub": "Mobiles & Computers",
+    "closesIn": "Closes in {time}",
+    "opensIn": "Opens in {time}",
+    "sectionsLabel": "Page sections"
   },
   "hero": {
     "headline": "Sales and service under one roof",

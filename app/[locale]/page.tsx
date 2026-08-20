@@ -9,6 +9,7 @@ import {
   jsonLdScript,
 } from '@/lib/seo';
 import { HeroSection } from '@/components/home/HeroSection';
+import { AboutSection } from '@/components/home/AboutSection';
 import { TrustStrip } from '@/components/home/TrustStrip';
 import { CategoryStrip } from '@/components/home/CategoryStrip';
 import { ProductRail } from '@/components/home/ProductRail';
@@ -59,8 +60,10 @@ export default async function HomePage({
       <script {...jsonLdScript(localBusinessJsonLd(locale as Locale))} />
       <script {...jsonLdScript(organizationJsonLd(locale as Locale))} />
 
+      <div id="top" />
       <HeroSection />
       <TrustStrip />
+      <AboutSection />
       <CategoryStrip />
 
       <ProductRail

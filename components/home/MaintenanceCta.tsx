@@ -23,7 +23,7 @@ export async function MaintenanceCta() {
     .slice(0, 4);
 
   return (
-    <section className="band-ink py-14 lg:py-24">
+    <section id="services" className="band-ink scroll-mt-24 py-14 lg:py-24">
       <div className="wrap">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <div className="flex flex-col gap-4">
