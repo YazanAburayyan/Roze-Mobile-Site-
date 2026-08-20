@@ -45,7 +45,7 @@ export async function Header() {
       {/* NOT .wrap: at 1080px the nav, badge, search, locale and cart do not fit,
           and because the nav was flex-1/min-w-0 its no-shrink children spilled
           out of their box and overlapped the logo and the status badge. */}
-      <div className="mx-auto flex w-full max-w-[1600px] items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[1600px] items-center gap-3 px-4 py-2 sm:gap-6 sm:px-6 lg:px-8">
         <MobileNav categories={categories} initialStatus={status} />
 
         <Link

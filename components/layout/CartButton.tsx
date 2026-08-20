@@ -29,7 +29,9 @@ export function CartButton({ className }: { className?: string }) {
       href="/cart"
       aria-label={countLabel ? `${t('cartLabel')} — ${countLabel}` : t('cartLabel')}
       className={cn(
-        'relative inline-flex size-10 shrink-0 items-center justify-center rounded-sm text-ink transition-colors hover:bg-mist motion-reduce:transition-none',
+        'relative inline-flex size-10 shrink-0 items-center justify-center rounded-sm',
+        'text-mist transition-colors hover:bg-paper/10 hover:text-paper',
+        'motion-reduce:transition-none',
         className
       )}
     >

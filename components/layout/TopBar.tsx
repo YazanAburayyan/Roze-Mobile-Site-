@@ -20,7 +20,7 @@ export async function TopBar() {
 
   return (
     <div className="band-ink hidden border-b border-line-invert sm:block">
-      <div className="wrap flex h-10 items-center justify-between gap-4">
+      <div className="wrap flex h-8 items-center justify-between gap-4">
         <div className="flex items-center gap-5">
           <a
             href={`tel:${phones.showroom.e164}`}
