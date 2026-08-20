@@ -117,20 +117,40 @@ unless you're deliberately deviating.
 `Ref/RozeLogo.png` — 2400×1338 transparent PNG, **with a white circle baked into
 the artwork**. On a white or paper ground the mark visually breaks.
 
-**Never place the logo directly on a light background. Always use `.logo-plate`.**
+**Never place the logo directly on a light background.**
+
+`.logo-plate` used to exist for this and has been **deleted**. Wrapping the mark
+in a black rectangle satisfied the rule and made the logo read as a sticker
+pasted onto the page rather than as identity. The container was the wrong answer
+to a real constraint.
+
+Two sanctioned treatments instead:
+
+**1. Put the logo in a section that is already dark.** No container needed.
 
 ```tsx
-<span className="logo-plate">
-  <Image src="/RozeLogo.png" alt="Roze Mobiles & Computers" width={160} height={89} priority />
-</span>
+<footer className="band-ink">
+  <Image src="/logo/roze-logo.png" alt="Roze Mobiles & Computers"
+         width={160} height={89} sizes="160px" />
+</footer>
 ```
 
-- `.logo-plate` — ink `#060606` ground (default; use this in the header).
-- `.logo-plate--teal` — teal ground, the only other sanctioned surface.
-- `.logo-plate--scrim` — ≥60% black scrim, for the logo over photography.
+**2. On a light ground, use the wordmark.** Type, not the PNG — legitimate brand
+expression that sidesteps the constraint entirely. This is what the header uses.
 
-The plate bakes in the clear-space padding (≥ half the solid circle's radius) and
-enforces the 120px minimum on-screen logo width via `min-inline-size`.
+```tsx
+<span className="wordmark">ROZE</span>
+```
+
+Also forbidden, and these are absolute:
+
+- **Never redraw, approximate or reconstruct the mark** in CSS or SVG — not as a
+  hero graphic, not as decoration, not as a background pattern. The brand guide's
+  "two intersecting circles" is an explanation of what the existing mark *means*,
+  not an instruction to draw circles.
+- **Never show the logo more than once per viewport.**
+- Serve it through `next/image` at the size actually rendered. The source is
+  2400px wide; shipping that to a 160px slot is why the old page felt slow.
 
 Also forbidden: upscaling past 2400px native width, recoloring the gradient,
 flipping, stretching, adding shadow/border/glow to the mark, or separating the
@@ -186,7 +206,7 @@ Default document is `lang="ar" dir="rtl"`; the English locale flips to
 - Headings get `text-wrap: balance`, paragraphs `text-wrap: pretty`.
 - `a` defaults to `teal-deep`.
 - `:focus-visible` — 3px indigo outline, 3px offset, plus a mist halo so it is
-  unmistakable on both paper and ink. Inside `.on-ink` / `.logo-plate` the ring
+  unmistakable on both paper and ink. Inside `.on-ink` / `.band-ink` the ring
   inverts (mist outline, indigo halo). **Never write `outline: none`.** If you build
   a custom control, make sure the real focusable element is the one receiving focus.
 - `@media (prefers-reduced-motion: reduce)` kills animations, transitions and smooth
@@ -201,7 +221,8 @@ Default document is `lang="ar" dir="rtl"`; the English locale flips to
 | `.wrap` | Page container: `max-inline-size: 1080px`, centered, fluid inline padding `clamp(1rem, 4vw, 2rem)`. |
 | `.eyebrow` | Mono 11px, .18em tracking, uppercase, muted. Inverts inside `.on-ink`. |
 | `.lede` | 17px muted intro paragraph, `max-inline-size: 62ch`. Inverts inside `.on-ink`. |
-| `.logo-plate` (+ `--teal`, `--scrim`) | The logo container. See §4. |
+| `.band-paper` / `.band-sand` / `.band-ink` | Section band grounds. See §4. |
+| `.wordmark` | ROZE set as type, for light grounds. See §4. |
 | `.ring-gradient` | Signature gradient as a background. |
 | `.ring-gradient-border` | Signature gradient as a 1px border. |
 | `.on-ink` | Marker class on dark sections; flips eyebrow/lede/focus colors. |

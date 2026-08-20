@@ -50,14 +50,16 @@
     "whatsapp": "WhatsApp",
     "showroomPhone": "+962 79 900 0301",
     "maintenancePhone": "+962 796 003040",
-    "cartItemCount": "{count, plural, one {1 item} other {# items}}"
+    "cartItemCount": "{count, plural, one {1 item} other {# items}}",
+    "brandMark": "ROZE",
+    "brandMarkSub": "Mobiles & Computers"
   },
   "hero": {
     "headline": "Sales and service under one roof",
-    "subheadline": "Everything you need — devices and repairs — in one place. Open until midnight, seven days a week.",
+    "subheadline": "Phones, laptops and accessories ready to take home, plus screen, battery and software repairs in the same shop.",
     "browseDevices": "Browse devices",
     "bookRepair": "Book a repair",
-    "openUntilMidnight": "Open until midnight every day"
+    "hoursLine": "Open {days} days a week, until {closing}"
   },
   "home": {
     "categories": "Categories",
@@ -78,7 +80,8 @@
     "whyUsItem_3_title": "4.5-star rating",
     "whyUsItem_3_body": "159 satisfied customers on Google. We listen to what they say.",
     "whyUsItem_4_title": "A real shop you can visit",
-    "whyUsItem_4_body": "Jubaiha, Abu Nsair Street, Building 157. See the devices in person and talk to us face-to-face."
+    "whyUsItem_4_body": "Jubaiha, Abu Nsair Street, Building 157. See the devices in person and talk to us face-to-face.",
+    "ratingBody": "A real rating from customers who came into the shop, published on Google Maps."
   },
   "product": {
     "specifications": "Specifications",
@@ -230,6 +233,10 @@
   },
   "footer": {
     "quickLinks": "Quick links",
+    "shop": "Shop",
+    "service": "Service",
+    "company": "Company",
+    "contact": "Contact",
     "categories": "Categories",
     "openingHours": "Opening hours",
     "saturday_to_thursday": "Saturday – Thursday",
@@ -252,7 +259,8 @@
       "friday": "Friday",
       "saturday": "Saturday"
     },
-    "googleReviews": "{count, plural, one {1 review on Google} other {# reviews on Google}}"
+    "googleReviews": "{count, plural, one {1 review on Google} other {# reviews on Google}}",
+    "tagline": "Phones, laptops and gaming devices — sold and repaired in Jubaiha. Open until midnight, seven days a week."
   },
   "contact": {
     "pageTitle": "Contact us",
@@ -283,7 +291,7 @@
   "pages": {
     "about": {
       "pageTitle": "About Roze",
-      "headline": "Sales and service — two intersecting circles",
+      "headline": "We sell the devices, and we fix them, in the same shop",
       "introBody": "Roze Mobiles & Computers isn't just an electronics shop. Here in Jubaiha, Abu Nsair Street, Building 157, the idea is simple: you need a new device, then you need repair. Why visit two places?",
       "storyHeadline": "One place, two services",
       "storyBody": "Here you can buy the latest phones, laptops, and devices. And if your device breaks or needs repair, you can bring it to us in the same place. We diagnose the problem, fix it, and return the device quickly.",

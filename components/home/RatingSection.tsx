@@ -1,6 +1,6 @@
 import { Star } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
-import { reputation, social } from '@/lib/site';
+import { reputation, address } from '@/lib/site';
 
 
 /**
@@ -18,40 +18,52 @@ export async function RatingSection() {
   });
 
   return (
-    <section className="wrap py-10 lg:py-16">
-      <div className="ring-gradient-border flex flex-col items-center gap-3 rounded-lg border border-line bg-paper px-6 py-10 text-center shadow-roze">
-        <span className="eyebrow">{t('home.ourRating')}</span>
-
-        <div aria-hidden="true" className="flex items-center gap-1">
-          {Array.from({ length: 5 }, (_, i) => (
-            <Star
-              key={i}
-              className={
-                i < rounded
-                  ? 'size-7 fill-teal-deep text-teal-deep'
-                  : 'size-7 fill-transparent text-muted'
-              }
-            />
-          ))}
+    <section className="band-paper"><div className="wrap py-12 lg:py-16">
+      {/*
+        Evidence, not decoration. The previous version floated tiny stars in a
+        large empty card, which read as an ornament. This states the number,
+        the count and the source in one line a person can check, and links to
+        the actual Google listing so the claim is verifiable.
+      */}
+      <div className="flex flex-col items-start gap-5 rounded-md border border-line bg-surface p-6 shadow-roze sm:flex-row sm:items-center sm:gap-8 sm:p-8">
+        <div className="flex shrink-0 items-center gap-4">
+          <p className="text-display leading-none text-ink" data-numeric dir="ltr" aria-hidden="true">
+            {reputation.ratingValue}
+          </p>
+          <div className="flex flex-col gap-1">
+            <div aria-hidden="true" className="flex items-center gap-0.5">
+              {Array.from({ length: 5 }, (_, i) => (
+                <Star
+                  key={i}
+                  className={
+                    i < rounded
+                      ? 'size-4 fill-gold text-gold'
+                      : 'size-4 fill-transparent text-line'
+                  }
+                />
+              ))}
+            </div>
+            <span className="text-small text-muted" data-numeric>
+              {t('footer.googleReviews', { count: reputation.reviewCount })}
+            </span>
+          </div>
         </div>
 
         <p className="sr-only">{ratingLabel}</p>
 
-        <p aria-hidden="true" className="text-h3 text-ink" data-numeric dir="ltr">
-          {reputation.ratingValue} / 5
+        <p className="text-body text-muted sm:border-s sm:border-line sm:ps-8">
+          {t('home.ratingBody')}
         </p>
 
         <a
-          href={social.facebook}
+          href={address.mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-small font-medium text-teal-deep hover:underline"
+          className="shrink-0 text-small font-medium text-teal-deep underline-offset-4 hover:underline sm:ms-auto"
         >
-          {t('footer.googleReviews', {
-            count: reputation.reviewCount,
-          })}
+          {t('home.ourRating')}
         </a>
       </div>
-    </section>
+    </div></section>
   );
 }

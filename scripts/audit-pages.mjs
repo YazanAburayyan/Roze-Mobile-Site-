@@ -77,7 +77,7 @@ for (const p of PATHS) {
     if (/<img[^>]*roze-logo/.test(html)) {
       const idx = html.search(/<img[^>]*roze-logo/);
       const context = html.slice(Math.max(0, idx - 400), idx);
-      if (!/logo-plate|bg-ink|bg-teal|on-ink/.test(context)) {
+      if (!/band-ink|bg-ink|bg-teal|on-ink/.test(context)) {
         add(page, 'logo-on-light', 'no plate/ink ancestor');
       }
     }

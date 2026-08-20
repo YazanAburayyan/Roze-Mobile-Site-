@@ -1,23 +1,38 @@
-<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-  <!-- Mist background -->
-  <rect width="400" height="400" fill="#B5DDDF"/>
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+  <!--
+    Static fallback for any <img>/next-image consumer that points straight at
+    this file (e.g. the product-gallery main image before hydration). The
+    per-category, per-SKU variant used on catalogue grids lives in
+    components/commerce/ProductImagePlaceholder.tsx — this file is the single
+    generic version: warm surface, hairline border, faint diagonal texture,
+    a soft ring-gradient wash, and a generic device glyph in low-opacity
+    teal-deep. Deliberately not the ROZE mark: no circles, no rings echoing
+    the logo.
+  -->
+  <defs>
+    <pattern id="hairline" width="20" height="20" patternTransform="rotate(135)" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="20" stroke="#2B2118" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="wash" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B5DDDF"/>
+      <stop offset="45%" stop-color="#66C0C9"/>
+      <stop offset="100%" stop-color="#525BA2"/>
+    </linearGradient>
+  </defs>
 
-  <!-- Simple centered device glyph (smartphone) -->
-  <!-- This is a deliberate, intentional placeholder design -->
-  <g transform="translate(200, 200)">
-    <!-- Phone body -->
-    <rect x="-50" y="-90" width="100" height="180" rx="8" fill="none" stroke="#1E6A74" stroke-width="3"/>
+  <!-- Warm card surface -->
+  <rect width="400" height="400" fill="#FFFDFB"/>
+  <!-- Soft brand wash, kept very quiet -->
+  <rect width="400" height="400" fill="url(#wash)" opacity="0.05"/>
+  <!-- Faint diagonal hairline field -->
+  <rect width="400" height="400" fill="url(#hairline)"/>
+  <!-- Hairline border -->
+  <rect x="1" y="1" width="398" height="398" fill="none" stroke="#2B2118" stroke-opacity="0.14" stroke-width="1"/>
 
-    <!-- Screen -->
-    <rect x="-45" y="-80" width="90" height="130" rx="4" fill="#1E6A74" opacity="0.15"/>
-
-    <!-- Notch -->
-    <rect x="-20" y="-80" width="40" height="12" rx="6" fill="#B5DDDF"/>
-
-    <!-- Home button -->
-    <circle cx="0" cy="75" r="4" fill="#1E6A74"/>
-
-    <!-- Speaker slot -->
-    <line x1="-15" y1="-85" x2="15" y2="-85" stroke="#1E6A74" stroke-width="1.5" opacity="0.5"/>
+  <!-- Generic device glyph, low-opacity teal-deep -->
+  <g transform="translate(200, 200)" stroke="#1E6A74" stroke-opacity="0.28" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <rect x="-52" y="-92" width="104" height="184" rx="14"/>
+    <line x1="-24" y1="66" x2="24" y2="66"/>
+    <line x1="-20" y1="-70" x2="20" y2="-70"/>
   </g>
 </svg>

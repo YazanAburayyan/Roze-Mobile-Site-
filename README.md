@@ -107,9 +107,11 @@ both halves of this, including that teal still fails.
 
 ### The logo rule
 `ref/RozeLogo.png` has a white circle baked into the artwork — on a white
-background the mark visually breaks. The logo may only sit on ink `#060606`,
-teal, or imagery. Use the `.logo-plate` class, which makes this impossible to
-get wrong.
+background the mark visually breaks. So: put it in a section that is already
+dark (the footer's `.band-ink`), or on a light ground use the `.wordmark` class
+and set ROZE as type instead. Never redraw the mark, never show it twice in one
+viewport, and never ship the 2400px original to a small slot. See
+DESIGN_SYSTEM.md section 4.
 
 ## Documentation
 

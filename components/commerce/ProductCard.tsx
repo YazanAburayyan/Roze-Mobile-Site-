@@ -7,11 +7,12 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import type { Locale } from "@/i18n/routing";
 import type { listProducts } from "@/lib/catalog";
-import { productImageUrl } from "@/lib/product-image";
+import { PLACEHOLDER_IMAGE, productImageUrl } from "@/lib/product-image";
 import { useCart } from "@/lib/cart/store";
 import { cn } from "@/components/ui";
 import { PriceDisplay } from "./PriceDisplay";
 import { StockBadge } from "./StockBadge";
+import { ProductImagePlaceholder } from "./ProductImagePlaceholder";
 
 export type ProductCardProduct = Awaited<ReturnType<typeof listProducts>>["products"][number];
 
@@ -36,6 +37,8 @@ export function ProductCard({ product, className }: ProductCardProps) {
   const title = locale === "ar" ? product.titleAr : product.titleEn;
   const image = product.images[0];
   const imageAlt = image ? (locale === "ar" ? image.altAr : image.altEn) : title;
+  const imageSrc = productImageUrl(image);
+  const hasPhoto = imageSrc !== PLACEHOLDER_IMAGE;
 
   function handleAddToCart(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
@@ -59,10 +62,20 @@ export function ProductCard({ product, className }: ProductCardProps) {
   return (
     <div
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-md border border-line bg-paper shadow-roze",
+        "group relative flex flex-col overflow-hidden rounded-md border border-line bg-surface shadow-roze",
+        "transition-transform duration-300 ease-out hover:-translate-y-1",
+        "motion-reduce:transition-none motion-reduce:hover:translate-y-0",
         className
       )}
     >
+      {/* Deepens on hover via opacity only, layered under the shadow-roze
+          base above, so the "lift" reads as transform + opacity, never a
+          transitioned box-shadow. */}
+      <div
+        className="pointer-events-none absolute inset-0 rounded-md opacity-0 shadow-lg transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none"
+        aria-hidden="true"
+      />
+
       <Link
         href={`/product/${product.slug}`}
         className="absolute inset-0 z-10 rounded-md focus-visible:outline-none"
@@ -70,14 +83,18 @@ export function ProductCard({ product, className }: ProductCardProps) {
         <span className="sr-only">{title}</span>
       </Link>
 
-      <div className="relative aspect-square w-full overflow-hidden bg-mist/40">
-        <Image
-          src={productImageUrl(image)}
-          alt={imageAlt}
-          fill
-          sizes="(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 90vw"
-          className="object-contain transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-        />
+      <div className="relative aspect-square w-full overflow-hidden border-b border-line">
+        {hasPhoto ? (
+          <Image
+            src={imageSrc}
+            alt={imageAlt}
+            fill
+            sizes="(min-width: 1024px) 23vw, (min-width: 640px) 45vw, 90vw"
+            className="object-contain transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+          />
+        ) : (
+          <ProductImagePlaceholder categoryIcon={product.category.icon} seed={product.sku} />
+        )}
         {!product.inStock ? (
           <div className="absolute inset-0 bg-paper/50" aria-hidden="true" />
         ) : null}
@@ -94,6 +111,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
         ) : null}
 
         <h3 className="line-clamp-2 text-body font-medium text-ink">{title}</h3>
+
+        <span dir="ltr" className="font-mono text-small text-muted">
+          {product.sku}
+        </span>
 
         <div className="mt-auto flex flex-col gap-3">
           <PriceDisplay

@@ -1,36 +1,47 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import type { Locale } from '@/i18n/routing';
+import { getFeaturedProducts } from '@/lib/catalog';
 import {
-  getFeaturedProducts,
-  getNewArrivals,
-  getDiscountedProducts,
-  getProductsForCategorySlug,
-} from '@/lib/catalog';
-import { alternatesFor, localBusinessJsonLd, organizationJsonLd, jsonLdScript } from '@/lib/seo';
+  alternatesFor,
+  localBusinessJsonLd,
+  organizationJsonLd,
+  jsonLdScript,
+} from '@/lib/seo';
 import { HeroSection } from '@/components/home/HeroSection';
+import { TrustStrip } from '@/components/home/TrustStrip';
 import { CategoryStrip } from '@/components/home/CategoryStrip';
 import { ProductRail } from '@/components/home/ProductRail';
 import { MaintenanceCta } from '@/components/home/MaintenanceCta';
 import { RatingSection } from '@/components/home/RatingSection';
 import { LocationSection } from '@/components/home/LocationSection';
-import { WhyUsSection } from '@/components/home/WhyUsSection';
 
 export async function generateMetadata(): Promise<Metadata> {
-  return {
-    alternates: alternatesFor(''),
-  };
+  return { alternates: alternatesFor('') };
 }
 
 /**
  * ROZE homepage.
  *
- * Every section reads from lib/catalog (never Prisma directly), lib/site.ts
- * (never a typed-in phone/address/hours literal) and next-intl (never a
- * hardcoded UI string). Each rail hides itself when its query is empty
- * rather than rendering a bare heading — see ProductRail — though with 48
- * seeded products, 28 discounted and 8 new arrivals, nothing here should
- * actually be empty.
+ * COMPOSITION NOTE — why there is only ONE product rail.
+ *
+ * This page used to stack six near-identical rails: featured, new arrivals,
+ * offers, phones, laptops, entertainment. On desktop that was ~10,000px of the
+ * same component, and it was the main reason the page read as filler rather
+ * than as a shop. The three per-category rails duplicated the category grid
+ * directly above them, and "new arrivals" and "offers" are both reachable from
+ * the nav and from /offers.
+ *
+ * So: one curated rail, and the category grid does the browsing work it was
+ * always meant to do. If a merchandising rail is wanted back later, add it
+ * here — but not three of them.
+ *
+ * Band rhythm: ink hero -> sand trust -> paper categories -> paper rail ->
+ * INK maintenance -> paper rating -> sand location -> ink footer. The two dark
+ * bands give the page a spine.
+ *
+ * Everything reads from lib/catalog (never Prisma), lib/site.ts (never a typed
+ * phone/address/hour) and next-intl (never a hardcoded string).
  */
 export default async function HomePage({
   params,
@@ -41,15 +52,7 @@ export default async function HomePage({
   setRequestLocale(locale);
   const t = await getTranslations();
 
-  const [featured, newArrivals, discounted, phoneProducts, laptopProducts, entertainmentProducts] =
-    await Promise.all([
-      getFeaturedProducts(8),
-      getNewArrivals(8),
-      getDiscountedProducts(8),
-      getProductsForCategorySlug('phones', 8),
-      getProductsForCategorySlug('laptops', 8),
-      getProductsForCategorySlug('entertainment', 8),
-    ]);
+  const featured = await getFeaturedProducts(8);
 
   return (
     <>
@@ -57,37 +60,18 @@ export default async function HomePage({
       <script {...jsonLdScript(organizationJsonLd(locale as Locale))} />
 
       <HeroSection />
+      <TrustStrip />
       <CategoryStrip />
 
-      <ProductRail heading={t('home.featuredProducts')} products={featured} />
-
-      <ProductRail heading={t('home.newArrivals')} products={newArrivals} />
-
-      <ProductRail heading={t('home.offers')} products={discounted} viewAllHref="/offers" />
-
       <ProductRail
-        eyebrow={t('home.categories')}
-        heading={t('nav.phones')}
-        products={phoneProducts}
-        viewAllHref="/category/phones"
-      />
-      <ProductRail
-        eyebrow={t('home.categories')}
-        heading={t('nav.laptops')}
-        products={laptopProducts}
-        viewAllHref="/category/laptops"
-      />
-      <ProductRail
-        eyebrow={t('home.categories')}
-        heading={t('nav.entertainment')}
-        products={entertainmentProducts}
-        viewAllHref="/category/entertainment"
+        heading={t('home.featuredProducts')}
+        products={featured}
+        viewAllHref="/offers"
       />
 
       <MaintenanceCta />
       <RatingSection />
       <LocationSection />
-      <WhyUsSection />
     </>
   );
 }

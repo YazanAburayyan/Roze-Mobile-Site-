@@ -7,8 +7,11 @@
  */
 const C = {
   teal: '#66C0C9', tealDeep: '#1E6A74', mist: '#B5DDDF', ink: '#060606',
-  gold: '#E1CF7E', indigo: '#525BA2', paper: '#F4FAFA', muted: '#5C6B6D',
+  gold: '#E1CF7E', indigo: '#525BA2', muted: '#6B6259',
   danger: '#B3251F', white: '#FFFFFF',
+  // Warm neutrals (R1). Cool neutrals made teal read as a wash; these make it
+  // read as an accent. `sand` is the alternating section band.
+  paper: '#FAF9F7', sand: '#F2EFEA', surface: '#FFFDFB',
 };
 
 const lum = (hex) => {
@@ -32,8 +35,17 @@ const pairs = [
   ['paper on ink (footer)', C.paper, C.ink, 4.5, true],
   ['mist on ink', C.mist, C.ink, 4.5, true],
   ['teal on ink', C.teal, C.ink, 4.5, true],
+  // Sand band — the alternating ground. Same guarantees as paper.
+  ['ink on sand', C.ink, C.sand, 4.5, true],
+  ['muted on sand', C.muted, C.sand, 4.5, true],
+  ['tealDeep on sand', C.tealDeep, C.sand, 4.5, true],
+  ['danger on sand', C.danger, C.sand, 4.5, true],
+  // Card surface sits on either light band.
+  ['ink on surface', C.ink, C.surface, 4.5, true],
+  ['muted on surface', C.muted, C.surface, 4.5, true],
   // Must FAIL — this is the rule the guide warns about.
   ['teal on paper (must fail AA)', C.teal, C.paper, 4.5, false],
+  ['teal on sand (must fail AA)', C.teal, C.sand, 4.5, false],
 ];
 
 let bad = 0;

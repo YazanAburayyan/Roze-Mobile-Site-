@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import Image from 'next/image';
 import { Phone, MessageCircle } from 'lucide-react';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
@@ -22,13 +21,17 @@ import { OpenStatusBadge } from './OpenStatusBadge';
  * (`getShopStatus`, always in Asia/Amman — see lib/hours.ts), then hands
  * both down to the interactive Client Components that render them.
  *
- * Usable at 320px: the four elements that must always stay reachable —
- * mobile menu trigger, the logo plate, a search affordance, and the cart —
- * sit on a single row that fits a 320px viewport with the plate's mandatory
- * 152px floor accounted for. Locale switch, the open/closed badge, and the
- * call/WhatsApp affordance step in at the `sm` breakpoint and are also
- * reachable from inside the mobile drawer regardless (open status + phone
- * numbers are both in `MobileNav`), so nothing is lost, only reflowed.
+ * Logo policy: the header sits on a light (paper) ground, so it renders the
+ * `.wordmark` typographic treatment, never the raster mark — the PNG is
+ * reserved for `.band-ink` sections (see Footer). No plate/container is
+ * reintroduced here.
+ *
+ * Usable at 320px: the elements that must always stay reachable — mobile
+ * menu trigger, the wordmark, a search affordance, and the cart — sit on a
+ * single row that fits a 320px viewport. Locale switch, the open/closed
+ * badge, and the call/WhatsApp affordance step in at the `sm` breakpoint and
+ * are also reachable from inside the mobile drawer regardless (open status +
+ * phone numbers are both in `MobileNav`), so nothing is lost, only reflowed.
  */
 export async function Header() {
   const t = await getTranslations();
@@ -43,20 +46,10 @@ export async function Header() {
       <div className="flex items-center gap-1 px-2 py-2 sm:gap-3 sm:px-4 lg:px-6">
         <MobileNav categories={categories} initialStatus={status} />
 
-        <Link href="/" aria-label={site.name[locale]} className="shrink-0">
-          {/* At the 320px floor the plate sits at its mandatory 120px logo +
-              32px clear-space minimum (152px total, matching `.logo-plate`'s
-              own `min-inline-size`). It grows on wider screens where there's
-              room, via width alone — `h-auto` keeps the 2400:1338 ratio. */}
-          <span className="logo-plate">
-            <Image
-              src="/logo/roze-logo.png"
-              alt={site.name[locale]}
-              width={160}
-              height={89}
-              priority
-              className="h-auto w-[120px] sm:w-[140px] lg:w-40"
-            />
+        <Link href="/" aria-label={site.name[locale]} className="flex shrink-0 items-baseline gap-1.5">
+          <span className="wordmark">{t('header.brandMark')}</span>
+          <span className="hidden shrink-0 font-mono text-[0.625rem] font-medium uppercase tracking-[0.18em] text-muted sm:inline-block">
+            {t('header.brandMarkSub')}
           </span>
         </Link>
 

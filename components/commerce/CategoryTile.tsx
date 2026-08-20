@@ -48,7 +48,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   router: Router,
 };
 
-function resolveIcon(name?: string | null): LucideIcon {
+/** Shared with the homepage category grid. */
+export function resolveCategoryIcon(name?: string | null): LucideIcon {
   if (!name) return Package;
   return ICON_MAP[name] ?? Package;
 }
@@ -62,7 +63,7 @@ export interface CategoryTileProps {
 
 /** Homepage category strip tile: icon over label, one link. */
 export function CategoryTile({ href, label, icon, className }: CategoryTileProps) {
-  const Icon = resolveIcon(icon);
+  const Icon = resolveCategoryIcon(icon);
 
   return (
     <Link

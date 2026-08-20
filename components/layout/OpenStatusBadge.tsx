@@ -45,7 +45,10 @@ export function OpenStatusBadge({
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 text-small font-medium',
+        // `status-badge` is a stable hook, not a style: globals.css uses it to
+        // re-tone the badge when it sits inside a `.band-ink` section (the
+        // hero), so the light-ground colours below stay the single source.
+        'status-badge inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 text-small font-medium',
         status.isOpen
           ? 'border-teal-deep/30 bg-mist/50 text-teal-deep'
           : 'border-line bg-transparent text-muted',

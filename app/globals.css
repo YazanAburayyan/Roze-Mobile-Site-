@@ -65,20 +65,33 @@
   --color-gold: #e1cf7e;
   /* End of the ring gradient. Gradients + active states only, never alone. */
   --color-indigo: #525ba2;
-  /* Page ground. */
-  --color-paper: #f4fafa;
+  /* --- Neutrals (warm) --------------------------------------------------
+     The neutrals are deliberately WARM. Teal only reads as a chosen accent
+     against a warm ground; the previous cool near-white (#F4FAFA) put the
+     page, the buttons and the tiles all in one hue and the whole thing
+     washed out. Never reintroduce a blue- or teal-tinted neutral. */
+  /* Page ground — default band. */
+  --color-paper: #faf9f7;
+  /* Alternating section band, one step deeper. Sections separate by ground,
+     NOT by borders. Use via `.band-sand`. */
+  --color-sand: #f2efea;
+  /* Card / raised surface. Sits legibly on paper AND on sand. */
+  --color-surface: #fffdfb;
 
   /* --- Supporting values ------------------------------------------------ */
-  --color-line: rgba(6, 6, 6, 0.12);
-  --color-muted: #5c6b6d;
+  /* Hairline is a warm brown-black at low alpha — a neutral or cool grey
+     hairline goes dirty over a warm ground. */
+  --color-line: rgba(43, 33, 24, 0.14);
+  /* Warm secondary text. AA on paper (5.68:1) and on sand (5.21:1). */
+  --color-muted: #6b6259;
   /* Hairlines and muted text on ink grounds. */
-  --color-line-invert: rgba(244, 250, 250, 0.16);
+  --color-line-invert: rgba(250, 249, 247, 0.16);
   --color-muted-invert: #b5dddf;
   /* Added for the UI primitive library (C1): semantic error/danger color.
      Not in the original brand palette — needed for form validation states
      (Input/Select/Checkbox aria-invalid text, Badge "danger" variant) since
      none of the brand colors are AA-safe for small error text on paper.
-     #B3251F on #F4FAFA paper = ~6.2:1, passes WCAG AA for small text. */
+     #B3251F on #FAF9F7 paper = 6.23:1, on #F2EFEA sand = 5.72:1 — AA. */
   --color-danger: #b3251f;
 
   /* --- Typography families --------------------------------------------- */
@@ -215,9 +228,9 @@
     box-shadow: 0 0 0 6px rgba(181, 221, 223, 0.65);
   }
 
-  /* Never remove the ring for mouse users on the dark plate either. */
+  /* Never remove the ring for mouse users on a dark band either. */
   .on-ink :focus-visible,
-  .logo-plate :focus-visible {
+  .band-ink :focus-visible {
     outline-color: var(--color-mist);
     box-shadow: 0 0 0 6px rgba(82, 91, 162, 0.75);
   }
@@ -265,9 +278,7 @@
     margin-block-end: 0.5rem;
   }
 
-  .on-ink .eyebrow {
-    color: var(--color-muted-invert);
-  }
+  /* (`.on-ink .eyebrow` inversion lives with the band system below.) */
 
   /* Arabic typography correction.
      `letter-spacing` breaks the cursive joining between Arabic letters — the
@@ -289,50 +300,147 @@
     text-wrap: pretty;
   }
 
+  /* --- SECTION BANDS ----------------------------------------------------
+     The page gets its rhythm from alternating grounds, not from borders or
+     rules. Compose: paper → sand → paper → INK → paper. Bands are full-bleed
+     (put a `.wrap` inside for the measure).
+
+     `.band-ink` is also the LOGO POLICY answer: the mark is only ever placed
+     in a section that is already dark. No plate, container or scrim is
+     invented to hold it. On light grounds use `.wordmark` instead. */
+  .band-paper {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  .band-sand {
+    background-color: var(--color-sand);
+    color: var(--color-ink);
+  }
+
+  .band-ink {
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  /* `.band-ink` implies the ink inversions, so authors do not have to
+     remember to write both. `.on-ink` remains usable on its own for
+     partial inversions (a dark card inside a light band). */
+  .band-ink,
+  .on-ink {
+    --color-line: var(--color-line-invert);
+  }
+
+  .band-ink .eyebrow,
+  .on-ink .eyebrow {
+    color: var(--color-muted-invert);
+  }
+
+  .band-ink .lede,
   .on-ink .lede {
     color: var(--color-mist);
   }
 
-  /* THE LOGO PLATE.
-     ref/RozeLogo.png has a white circle baked into the artwork: on a white or
-     paper ground the mark visually breaks. This plate is the ONLY sanctioned
-     way to render the logo on a light page. It is always an ink ground, so a
-     logo-on-white failure is structurally impossible.
-     Usage: <span class="logo-plate"><Image src="/RozeLogo.png" …/></span>
-     Clear space (>= half the solid circle's radius) is built into the padding;
-     min-inline-size guards the 120px minimum on-screen width. */
-  .logo-plate {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--color-ink);
-    background-image: none;
+  .band-ink a,
+  .on-ink a {
+    color: var(--color-mist);
+  }
+
+  .band-ink hr,
+  .on-ink hr {
+    border-block-start-color: var(--color-line-invert);
+  }
+
+  /* Card surface. Legible on both light bands. */
+  .surface {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-line);
     border-radius: var(--radius-md);
-    padding-block: 0.75rem;
-    padding-inline: 1rem;
-    min-inline-size: 152px; /* 120px logo + clear space */
-    box-shadow: var(--shadow-roze);
-    /* No border/glow on the mark itself — the plate carries the container. */
   }
 
-  .logo-plate img,
-  .logo-plate svg {
-    display: block;
-    min-inline-size: 120px;
-    max-inline-size: 100%;
-    block-size: auto;
+  /* --- WORDMARK ---------------------------------------------------------
+     The sanctioned light-background treatment of the brand: "ROZE" set as
+     type, not the PNG. Header uses this; the raster mark belongs in a
+     `.band-ink` section only. */
+  .wordmark {
+    font-family: var(--font-latin);
+    font-weight: 700;
+    font-size: 1.375rem;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    color: var(--color-ink);
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-block;
   }
 
-  /* Teal variant — the other sanctioned ground for the mark. */
-  .logo-plate--teal {
-    background-color: var(--color-teal);
+  .band-ink .wordmark,
+  .on-ink .wordmark {
+    color: var(--color-paper);
   }
 
-  /* Over photography: >=60% black scrim behind the mark. */
-  .logo-plate--scrim {
-    background-color: var(--roze-scrim);
-    backdrop-filter: blur(2px);
+  /* --- HERO AMBIENT LAYER -----------------------------------------------
+     Paint only. The hero is typographic: the mark is NOT drawn, echoed or
+     placed there (see the logo policy above). These two layers sit behind
+     the type inside `.hero-ambient` and are the documented photo swap point
+     — replacing that element with an <Image> needs no other change.
+
+     `.hero-field` is the brand ring gradient blurred into a wash. It is a
+     field, not a shape: no circle, ring or arc is legible in it.
+     `.hero-mesh` is straight-edged geometry only — two sets of hairlines. */
+  .hero-field {
+    background-image: var(--roze-ring);
   }
+
+  .hero-mesh {
+    background-image:
+      repeating-linear-gradient(
+        115deg,
+        transparent 0 46px,
+        var(--color-line-invert) 46px 47px
+      ),
+      repeating-linear-gradient(
+        25deg,
+        transparent 0 92px,
+        var(--color-line-invert) 92px 93px
+      );
+  }
+
+  /* --- HERO MOTION -------------------------------------------------------
+     Exactly two: one entrance on the content block, one slow ambient drift
+     on the gradient field. transform/opacity only, ease-out, nothing bounces
+     and nothing blocks first paint beyond a single short fade. */
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 14px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes hero-drift {
+    from {
+      transform: translate3d(0, -2%, 0) scale(1.08);
+    }
+    to {
+      transform: translate3d(0, 2%, 0) scale(1.16);
+    }
+  }
+
+  .hero-enter {
+    animation: hero-rise 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero-field {
+    animation: hero-drift 28s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+
+  /* (Reduced-motion disabling for these lives unlayered at the end of this
+     file — Tailwind's `utilities` layer would otherwise outrank it.) */
 
   /* The signature ring gradient as a fill. */
   .ring-gradient {
@@ -358,4 +466,57 @@
     mask-composite: exclude;
     pointer-events: none;
   }
+}
+
+/* =============================================================================
+   UNLAYERED OVERRIDES
+   -----------------------------------------------------------------------------
+   Everything above sits in a cascade layer, and Tailwind's `utilities` layer is
+   declared last — so a utility class beats any layered rule regardless of
+   specificity. These two blocks must win over utilities, so they are
+   deliberately unlayered (unlayered CSS outranks every layer).
+   Keep this section tiny and scoped; it is not a general escape hatch.
+   ========================================================================== */
+
+/* OpenStatusBadge is authored for light grounds (mist fill, teal-deep text).
+   Inside an ink band those invert: the fill drops to a teal tint and mist
+   becomes the text colour (12.3:1 on ink). The component keeps one source of
+   truth for its markup; only the tone changes. */
+.band-ink .status-badge[data-state="open"],
+.on-ink .status-badge[data-state="open"] {
+  background-color: rgba(102, 192, 201, 0.16);
+  border-color: rgba(181, 221, 223, 0.45);
+  color: var(--color-mist);
+}
+
+.band-ink .status-badge[data-state="closed"],
+.on-ink .status-badge[data-state="closed"] {
+  border-color: var(--color-line-invert);
+  color: var(--color-muted-invert);
+}
+
+.band-ink .status-badge span,
+.on-ink .status-badge span,
+.band-ink .status-badge svg,
+.on-ink .status-badge svg {
+  color: inherit;
+  fill: currentColor;
+}
+
+/* Reduced motion DISABLES the hero motion outright — it does not merely
+   shorten it (the base layer's blanket 0.01ms rule is a floor, not the
+   contract). The un-animated state is the final state, so nothing is lost. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-enter,
+  .hero-field {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* In the hero the badge sits next to a line that already names the closing
+   hour, so the badge's own inline time is redundant there (and only there). */
+.hero-status .status-badge [data-numeric] {
+  display: none;
 }

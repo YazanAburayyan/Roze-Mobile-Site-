@@ -26,15 +26,30 @@ export async function LocationSection() {
   const hourGroups = groupedHours();
 
   return (
-    <section className="wrap py-10 lg:py-16">
+    <section className="band-sand"><div className="wrap py-12 lg:py-16">
       <span className="eyebrow">{t('home.findUs')}</span>
       <h2 className="text-h2 text-ink">{t('contact.visitTheShop')}</h2>
 
       <div className="mt-6 grid gap-6 overflow-hidden rounded-lg border border-line bg-paper shadow-roze lg:grid-cols-2">
-        <div className="ring-gradient relative flex min-h-56 items-center justify-center" aria-hidden="true">
-          <span className="flex size-20 items-center justify-center rounded-full bg-ink/60 backdrop-blur-sm">
-            <MapPin aria-hidden="true" className="size-10 text-paper" />
-          </span>
+        {/*
+          Deliberately NOT a map image and NOT a Google Maps iframe: an iframe
+          needs an API key nobody has and leaks visitor data, and a decorative
+          gradient with a pin on it is a picture of a map that shows no streets
+          and helps nobody find the shop. This panel carries the data a person
+          actually navigates by — Plus Code and coordinates, both copyable —
+          with the directions link doing the real work.
+        */}
+        <div className="band-ink flex min-h-56 flex-col justify-center gap-4 p-6 lg:p-8">
+          <MapPin aria-hidden="true" className="size-6 text-teal" strokeWidth={1.75} />
+          <div className="flex flex-col gap-1">
+            <span className="eyebrow">{t('contact.ourLocationOnMap')}</span>
+            <p className="font-mono text-body text-paper" dir="ltr" data-numeric>
+              {address.plusCode}
+            </p>
+            <p className="font-mono text-small text-mist" dir="ltr" data-numeric>
+              {address.coordinates.lat}, {address.coordinates.lng}
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-col gap-6 p-6 lg:p-8">
@@ -85,6 +100,6 @@ export async function LocationSection() {
           </div>
         </div>
       </div>
-    </section>
+    </div></section>
   );
 }
