@@ -16,7 +16,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const describedBy = [descId, errorId].filter(Boolean).join(" ") || undefined;
 
     return (
-      <div className="flex flex-col gap-1.5">
+      <div className="flex min-w-0 flex-col gap-1.5">
         <label htmlFor={inputId} className="text-small font-medium text-ink">
           {label}
           {required ? (
@@ -38,7 +38,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
           className={cn(
-            "h-11 rounded-sm border border-line bg-mist/40 px-3 text-body text-ink",
+            "h-11 w-full min-w-0 rounded-sm border border-line bg-mist/40 px-3 text-body text-ink",
             "placeholder:text-muted outline-none transition-colors",
             "focus:border-teal-deep motion-reduce:transition-none",
             "disabled:cursor-not-allowed disabled:opacity-50",

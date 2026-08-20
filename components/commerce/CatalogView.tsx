@@ -94,8 +94,8 @@ export async function CatalogView({
   }
 
   return (
-    <div className={cn("grid grid-cols-1 gap-8 lg:grid-cols-[240px_1fr]", className)}>
-      <FilterPanel brands={brands} className="lg:sticky lg:top-4 lg:self-start" />
+    <div className={cn("grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)]", className)}>
+      <FilterPanel brands={brands} className="min-w-0 lg:sticky lg:top-24 lg:self-start" />
       {results}
     </div>
   );

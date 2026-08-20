@@ -104,7 +104,9 @@ export function FilterPanel({ brands, className }: FilterPanelProps) {
 
       <fieldset className="mt-4 flex flex-col gap-2 border-t border-line pt-4">
         <legend className="mb-1 text-small font-medium text-ink">{t("priceFilter")}</legend>
-        <div className="flex items-center gap-2">
+        {/* Each field is min-w-0 so the pair shares the row and shrinks with the
+            sidebar instead of overflowing it. */}
+        <div className="grid grid-cols-2 items-start gap-2">
           <Input
             label={t("minPrice")}
             type="number"
