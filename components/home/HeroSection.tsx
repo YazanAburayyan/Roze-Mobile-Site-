@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { Clock } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
@@ -40,18 +41,33 @@ export async function HeroSection() {
   return (
     <section className="band-ink relative isolate overflow-hidden">
       {/*
-        PHOTO SWAP POINT — this element and nothing else.
-        To put a real photograph behind the hero, replace the contents of
-        this <div> with a `next/image` fill image plus a scrim
-        (`background: var(--roze-scrim)`). Keep the wrapper's
-        `absolute inset-0 -z-10`; the type layer below is independent and
-        needs no recomposition. Do not reintroduce a circular graphic.
+        The photograph. This is the swap point the previous typographic hero
+        documented, now filled: a scrim sits over the image so the headline
+        keeps its contrast regardless of what the photo does underneath, and
+        the ring gradient still tints the whole thing so the section reads as
+        ROZE rather than as stock imagery.
+
+        To change the picture, replace public/photos/shop-interior.webp and
+        nothing else — the type layer below is independent.
       */}
       <div aria-hidden="true" className="hero-ambient absolute inset-0 -z-10">
-        {/* Ambient wash: the brand ring gradient blurred past legibility. */}
-        <div className="hero-field absolute inset-0 opacity-30 blur-3xl" />
-        {/* Restrained angular accent: straight hairlines only, fading out. */}
-        <div className="hero-mesh absolute inset-0 opacity-40 [mask-image:linear-gradient(to_bottom,var(--color-ink),transparent)]" />
+        <Image
+          src="/photos/shop-interior.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        {/*
+          A vertical gradient rather than a flat wash: a uniform scrim plus the
+          teal screen-blend turned the whole frame one murky green and the photo
+          stopped reading as a photo. Dark where the type sits, clearing toward
+          the top so the shop is actually visible. Vertical works in both
+          reading directions, so no RTL flip is needed.
+        */}
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/85 to-ink/40" />
+        <div className="hero-field absolute inset-0 opacity-15" />
       </div>
 
       <div className="wrap hero-enter flex flex-col items-start gap-5 py-14 sm:py-20 lg:py-28">
