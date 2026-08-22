@@ -379,65 +379,6 @@
     color: var(--color-paper);
   }
 
-  /* --- HERO AMBIENT LAYER -----------------------------------------------
-     Paint only. The hero is typographic: the mark is NOT drawn, echoed or
-     placed there (see the logo policy above). These two layers sit behind
-     the type inside `.hero-ambient` and are the documented photo swap point
-     — replacing that element with an <Image> needs no other change.
-
-     `.hero-field` is the brand ring gradient blurred into a wash. It is a
-     field, not a shape: no circle, ring or arc is legible in it.
-     `.hero-mesh` is straight-edged geometry only — two sets of hairlines. */
-  .hero-field {
-    background-image: var(--roze-ring);
-  }
-
-  .hero-mesh {
-    background-image:
-      repeating-linear-gradient(
-        115deg,
-        transparent 0 46px,
-        var(--color-line-invert) 46px 47px
-      ),
-      repeating-linear-gradient(
-        25deg,
-        transparent 0 92px,
-        var(--color-line-invert) 92px 93px
-      );
-  }
-
-  /* --- HERO MOTION -------------------------------------------------------
-     Exactly two: one entrance on the content block, one slow ambient drift
-     on the gradient field. transform/opacity only, ease-out, nothing bounces
-     and nothing blocks first paint beyond a single short fade. */
-  @keyframes hero-rise {
-    from {
-      opacity: 0;
-      transform: translate3d(0, 14px, 0);
-    }
-    to {
-      opacity: 1;
-      transform: translate3d(0, 0, 0);
-    }
-  }
-
-  @keyframes hero-drift {
-    from {
-      transform: translate3d(0, -2%, 0) scale(1.08);
-    }
-    to {
-      transform: translate3d(0, 2%, 0) scale(1.16);
-    }
-  }
-
-  .hero-enter {
-    animation: hero-rise 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  .hero-field {
-    animation: hero-drift 28s ease-in-out infinite alternate;
-    will-change: transform;
-  }
 
   /* (Reduced-motion disabling for these lives unlayered at the end of this
      file — Tailwind's `utilities` layer would otherwise outrank it.) */
@@ -503,23 +444,6 @@
   fill: currentColor;
 }
 
-/* Reduced motion DISABLES the hero motion outright — it does not merely
-   shorten it (the base layer's blanket 0.01ms rule is a floor, not the
-   contract). The un-animated state is the final state, so nothing is lost. */
-@media (prefers-reduced-motion: reduce) {
-  .hero-enter,
-  .hero-field {
-    animation: none !important;
-    transform: none !important;
-    opacity: 1 !important;
-  }
-}
-
-/* In the hero the badge sits next to a line that already names the closing
-   hour, so the badge's own inline time is redundant there (and only there). */
-.hero-status .status-badge [data-numeric] {
-  display: none;
-}
 
 /* Header search panel entrance. Transform and opacity only. The caller
    applies it under a `motion-safe:` variant, so under

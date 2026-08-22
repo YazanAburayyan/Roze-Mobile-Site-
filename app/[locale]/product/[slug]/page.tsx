@@ -23,7 +23,6 @@ import {
   productJsonLd,
 } from '@/lib/seo';
 import { ProductGallery, PriceDisplay, StockBadge, ProductCard } from '@/components/commerce';
-import { TrustStrip } from '@/components/home/TrustStrip';
 import { ProductBody } from './ProductBody';
 import { AddToCartPanel } from './AddToCartPanel';
 
@@ -301,10 +300,6 @@ export default async function ProductPage({
         </div>
       ) : null}
 
-      {/* The same four real guarantees the homepage carries. The reference had
-          "24×7 Support" here — ROZE closes at midnight, so that claim would be
-          false. Reusing TrustStrip keeps one source for these promises. */}
-      <TrustStrip />
     </>
   );
 }

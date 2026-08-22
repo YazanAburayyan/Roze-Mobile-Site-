@@ -19,7 +19,6 @@ import { alternatesFor, breadcrumbJsonLd, jsonLdScript } from '@/lib/seo';
 import { Breadcrumb } from '@/components/layout';
 import type { BreadcrumbItem } from '@/components/layout';
 import { CatalogView, CategoryTile } from '@/components/commerce';
-import { TrustStrip } from '@/components/home/TrustStrip';
 
 type CategoryTree = Awaited<ReturnType<typeof getCategoryTree>>;
 type CategoryNode = CategoryTree[number];
@@ -240,7 +239,6 @@ export default async function CategoryPage({
         </div>
       </section>
 
-      <TrustStrip />
     </>
   );
 }
